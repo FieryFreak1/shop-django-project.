@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная — ZoneShop{% endblock %}
+
+{% block content %}
+    <div class="welcome-banner">
+        <h2>Добро пожаловать в магазин ZoneShop!</h2>
+    </div>
+
+    <!-- БЛОК 1: НОВЫЕ ДОБАВЛЕННЫЕ ПРОДУКТЫ -->
+    <section class="products-section">
+        <h2>🔥 Свежие новинки</h2>
+        {% if new_products %}
+            <div class="products-grid">
+                {% for product in new_products %}
+                    <div class="product-card">
+                        <h3>{{ product.name }}</h3>
+                        <p class="product-date">Добавлен: {{ product.created_at|date:"j E" }}</p>
+                        <div class="product-price">
+                            {% if product.details %}
+                                <strong>{{ product.details.price }} руб.</strong>
+                                <p class="stock-info">Остаток: {{ product.details.stock }} шт.</p>
+                            {% else %}
+                                <span class="no-price">Цена не указана</span>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'product_detail' product.id %}" class="btn-detail">Посмотреть</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Новых товаров пока нет.</p>
+        {% endif %}
+    </section>
+
+    <hr>
+
+    <!-- БЛОК 2: ПОПУЛЯРНЫЕ ПРОДУКТЫ -->
+    <section class="products-section">
+        <h2>⭐ Популярные товары</h2>
+        {% if popular_products %}
+            <div class="products-grid">
+                {% for product in popular_products %}
+                    <div class="product-card">
+                        <h3>{{ product.name }}</h3>
+                        <!-- Для проверки мы можем временно оставить скрытый счетчик для вас -->
+                        <!-- <p>Продано: {{ product.details.sales_count }} шт.</p> -->
+                        <div class="product-price">
+                            {% if product.details %}
+                                <strong>{{ product.details.price }} руб.</strong>
+                                <p class="stock-info">Остаток: {{ product.details.stock }} шт.</p>
+                            {% else %}
+                                <span class="no-price">Цена не указана</span>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'product_detail' product.id %}" class="btn-detail">Посмотреть</a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Популярных товаров пока нет.</p>
+        {% endif %}
+    </section>
+
+    <div class="action-footer">
+        <br>
+        <a href="{% url 'add_product' %}" class="btn-add">Перейти к добавлению товара →</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Добавить товар — ZoneShop{% endblock %}
+{% block content %}
+    <h2>Добавление нового товара</h2>
+    <form method="POST">
+        {% csrf_token %} <!-- Обязательный тег безопасности Django вместо @csrf_exempt в будущем -->
+        <input type="text" name="title" placeholder="Название товара" required><br><br>
+        <input type="number" step="0.01" name="price" placeholder="Цена" required><br><br>
+        <input type="number" name="stock" placeholder="Остаток на складе" value="0"><br><br>
+        <button type="submit">Добавить товар</button>
+    </form>
+{% endblock %}
