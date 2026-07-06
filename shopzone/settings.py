@@ -16,6 +16,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Указываем Django, куда отправлять пользователей для входа в систему
+LOGIN_URL = '/secret-backend-zone-2026/'
+
 
 # Application definition
 

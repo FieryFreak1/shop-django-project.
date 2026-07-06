@@ -1,3 +1,4 @@
+# context_processor 
 from .models import StoreContact
 
 def footer_contact(request):

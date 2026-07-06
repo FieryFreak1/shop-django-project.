@@ -299,3 +299,30 @@ django.template.exceptions.TemplateSyntaxError: Template: C:\Users\aznau\Desktop
 [2026-07-04 21:36:40] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
 [2026-07-04 21:54:02] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
 [2026-07-05 23:13:05] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 00:12:34] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 00:12:58] INFO [django.utils.autoreload:265] C:\Users\aznau\Desktop\shop_dgango_progect\store\models.py changed, reloading.
+[2026-07-06 00:12:58] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 00:13:00] INFO [django.utils.autoreload:265] C:\Users\aznau\Desktop\shop_dgango_progect\store\models.py changed, reloading.
+[2026-07-06 00:13:00] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 00:13:02] INFO [django.utils.autoreload:265] C:\Users\aznau\Desktop\shop_dgango_progect\store\models.py changed, reloading.
+[2026-07-06 00:13:03] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 00:13:04] INFO [django.utils.autoreload:265] C:\Users\aznau\Desktop\shop_dgango_progect\store\models.py changed, reloading.
+[2026-07-06 00:13:05] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 00:13:09] INFO [django.utils.autoreload:265] C:\Users\aznau\Desktop\shop_dgango_progect\store\models.py changed, reloading.
+[2026-07-06 00:13:10] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 00:13:12] INFO [django.utils.autoreload:265] C:\Users\aznau\Desktop\shop_dgango_progect\store\models.py changed, reloading.
+[2026-07-06 00:13:12] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 00:13:13] INFO [django.utils.autoreload:265] C:\Users\aznau\Desktop\shop_dgango_progect\store\models.py changed, reloading.
+[2026-07-06 00:13:14] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 14:34:25] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 14:34:28] INFO [store.views:20] На главную страницу зашел гость с IP: 127.0.0.1
+[2026-07-06 14:34:33] WARNING [django.request:249] Not Found: /accounts/login/
+[2026-07-06 14:34:56] WARNING [django.request:249] Not Found: /accounts/login/
+[2026-07-06 14:36:59] INFO [store.views:20] На главную страницу зашел гость с IP: 127.0.0.1
+[2026-07-06 14:38:55] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 14:38:56] INFO [store.views:20] На главную страницу зашел гость с IP: 127.0.0.1
+[2026-07-06 14:43:02] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 14:43:05] INFO [store.views:20] На главную страницу зашел гость с IP: 127.0.0.1
+[2026-07-06 14:47:18] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
+[2026-07-06 14:47:19] INFO [store.views:20] На главную страницу зашел гость с IP: 127.0.0.1
+[2026-07-06 14:51:21] INFO [store.views:20] На главную страницу зашел гость с IP: 127.0.0.1
