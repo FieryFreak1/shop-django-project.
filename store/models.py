@@ -3,20 +3,103 @@ import string
 from django.core.validators import MinLengthValidator  
 from django.db import models
 
+
+class Category(models.Model):
+    name = models.CharField(max_length=60, unique=True,verbose_name='Названия категорий')
+    
+    class Meta:
+        verbose_name ='Категория'
+        verbose_name_plural = 'Категоии'
+    
+    def __str__(self) -> str: 
+        return self.name
+
+
+
+# --- 2. НОВАЯ ТАБЛИЦА ТЕГОВ (НЕОБЯЗАТЕЛЬНАЯ) ---
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True, verbose_name="Тег")
+
+    class Meta:
+        verbose_name = "Тег"
+        verbose_name_plural = "Теги"
+
+    def __str__(self):
+        return self.name
+
+
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        
+        # ManyToManyField можно заполнять только ПОСЛЕ того, как объект сохранен в БД (получил ID)
+        if is_new and not self.tags.exists():
+            default_tag, created = Tag.objects.get_or_create(name="Общий")
+            self.tags.add(default_tag)
+
+
+# --- ОБНОВЛЕННАЯ МОДЕЛЬ ТОВАРА ---
 class Product(models.Model):
     name = models.CharField(
         max_length=40, 
         validators=[MinLengthValidator(1)], 
         verbose_name="Название товара"
     )
-    # Используем DateField вместо DateTimeField (сохраняет только дату)
+    # Обязательная категория (null=False гарантирует это на уровне БД)
+    category = models.ForeignKey(
+        Category, 
+        on_delete=models.PROTECT, 
+        related_name="products", 
+        verbose_name="Категория"
+    )
+    # Необязательные теги (blank=True позволяет создавать товар без них)
+    tags = models.ManyToManyField(
+        Tag, 
+        blank=True, 
+        related_name="products", 
+        verbose_name="Теги товара"
+    )
     created_at = models.DateField(
         auto_now_add=True, 
         verbose_name="Дата добавления"
     )
 
+    class Meta:
+        verbose_name = "Товар"
+        verbose_name_plural = "Товары"
+
     def __str__(self):
         return self.name
+
+
+# --- 3. НОВАЯ СИСТЕМА ОЦЕНОК И АНКЕТНЫХ ОТЗЫВОВ ---
+class ProductReview(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="reviews", verbose_name="Товар")
+    ip_address = models.GenericIPAddressField(verbose_name="IP гостя")
+    comment = models.TextField(verbose_name="Текстовый отзыв", blank=True, null=True)
+    
+    # Вопросы анкеты (Используем BooleanField: True = Да / Положительно, False = Нет / Отрицательно)
+    is_size_matched = models.BooleanField(verbose_name="Размер подошел?")
+    is_packaging_intact = models.BooleanField(verbose_name="Упаковка была целой?")
+    is_delivery_fast = models.BooleanField(verbose_name="Доставка была быстрой?")
+    is_quality_good = models.BooleanField(verbose_name="Качество устроило?")
+    
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата отзыва")
+
+    class Meta:
+        verbose_name = "Отзыв о товаре"
+        verbose_name_plural = "Отзывы о товаре"
+        # Один гость может оставить только один отзыв на конкретный товар
+        unique_together = ('product', 'ip_address')
+
+    def __str__(self):
+        return f"Отзыв на {self.product.name} от {self.ip_address}"
+
+    @property
+    def calculated_score(self):
+        questions = [self.is_size_matched, self.is_packaging_intact, self.is_delivery_fast, self.is_quality_good]
+        positive_answers = sum(1 for q in questions if q is True)
+        return int((positive_answers / len(questions)) * 100)
 
 
 class ProductDetails(models.Model):

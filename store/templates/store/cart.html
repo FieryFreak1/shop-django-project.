@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Ваша корзина — ZoneShop{% endblock %}
+
+{% block content %}
+    <h2>🛒 Ваша корзина</h2>
+
+    {% if cart and cart.items.all %}
+        <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr style="background-color: #f2f2f2;">
+                    <th>Товар</th>
+                    <th>Цена</th>
+                    <th>Количество</th>
+                    <th>Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart.items.all %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>
+                            {% if item.product.details %}
+                                {{ item.product.details.price }} руб.
+                            {% else %}
+                                Цена не указана
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }} шт.</td>
+                        <td>
+                            {% if item.product.details %}
+                                {# Django не умеет умножать в шаблонах без кастомных фильтров, поэтому мы можем просто вывести структуру, либо оставить расчет на бэкенд. Но для наглядности выведем информацию #}
+                                {{ item.quantity }} x {{ item.product.details.price }} руб.
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <div style="text-align: right;">
+            <form action="{% url 'checkout' %}" method="POST" style="display: inline-block;">
+                {% csrf_token %}
+                <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; font-size: 16px;">
+                    💳 Оплатить заказ
+                </button>
+            </form>
+        </div>
+    {% else %}
+        <p>Ваша корзина пуста. Добавьте что-нибудь со <a href="{% url 'index' %}">главной страницы</a>!</p>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'index' %}">← Вернуться к покупкам</a>
+{% endblock %}

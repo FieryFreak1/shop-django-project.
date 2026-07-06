@@ -326,3 +326,4 @@ django.template.exceptions.TemplateSyntaxError: Template: C:\Users\aznau\Desktop
 [2026-07-06 14:47:18] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
 [2026-07-06 14:47:19] INFO [store.views:20] На главную страницу зашел гость с IP: 127.0.0.1
 [2026-07-06 14:51:21] INFO [store.views:20] На главную страницу зашел гость с IP: 127.0.0.1
+[2026-07-07 01:03:30] INFO [django.utils.autoreload:681] Watching for file changes with StatReloader
