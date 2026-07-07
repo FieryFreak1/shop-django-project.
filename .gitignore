@@ -2,8 +2,10 @@
 venv/
 .venv/
 
-# База данных
+# База данных и её служебные файлы WAL
 db.sqlite3
+db.sqlite3-wal
+db.sqlite3-shm
 
 # Логи
 logs/
