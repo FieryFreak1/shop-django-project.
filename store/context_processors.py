@@ -1,9 +1,7 @@
 from .models import StoreContact, Cart, WishList, RecentlyViewed 
 from .utils import get_client_ip
 
-# store/context_processors.py
-from .models import StoreContact, Cart, WishList, RecentlyViewed
-from .utils import get_client_ip
+
 
 def global_store_data(request):
     ip = get_client_ip(request)
@@ -28,10 +26,8 @@ def global_store_data(request):
 
 
 def footer_contact(request):
-    # Берем самую последнюю запись из таблицы контактов
     contact_data = StoreContact.objects.last()
-    
-    # Возвращаем словарь с данными. Если в базе пока пусто, вернем None
+
     return {
         'footer_contact_data': contact_data
     }

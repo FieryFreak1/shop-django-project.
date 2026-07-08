@@ -2,16 +2,14 @@ from decimal import Decimal, InvalidOperation
 import logging
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db import transaction
-from django.http import Http404, HttpResponse
+from django.http import  HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.contrib.auth.decorators import login_required, permission_required
 from django.utils.dateparse import parse_date
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 
-# ИМПОРТИРУЕМ ВСЕ НАШИ МОДЕЛИ
-from .models import AdminProfile, Product, ProductDetails, ProductImage, RecentlyViewed, StoreContact, Cart, CartItem, Order, OrderItem, TagProposal,Tag, Category, WishList, WishlistItem
-# ИМПОРТИРУЕМ УТИЛИТУ ДЛЯ ОПРЕДЕЛЕНИЯ IP
+from .models import AdminProfile, Product, ProductDetails, ProductImage, RecentlyViewed, Cart, CartItem, Order, OrderItem, TagProposal,Tag, Category, WishList, WishlistItem
 from .utils import get_client_ip
 
 
@@ -30,7 +28,6 @@ def index(request):
 
     # Ищем список желаний текущего гостя в базе данных по его IP
     wishlist = WishList.objects.filter(ip_address=user_ip).first()
-    # Вытаскиваем ID всех товаров, которые гость уже отметил звёздочкой
     global_wishlist_ids = [item.product.id for item in wishlist.items.all()] if wishlist else []
 
     context = {
