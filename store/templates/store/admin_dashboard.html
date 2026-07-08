@@ -1,0 +1,534 @@
+{% extends 'base.html' %}
+
+{% block title %}Пульт управления — ZoneShop{% endblock %}
+
+{% block content %}
+<style>
+    /* 🎛️ СТИЛИ ВЕРХНЕЙ ПАНЕЛИ ВКЛАДОК */
+    .admin-tabs-nav {
+        display: flex;
+        background: #1a252f;
+        padding: 10px;
+        border-radius: 12px;
+        gap: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        justify-content: space-around;
+    }
+    
+    /* Кнопки меню с парящими подсказками */
+    .tab-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 22px;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 55px;
+        height: 55px;
+    }
+    .tab-btn:hover, .tab-btn.active {
+        background: #2c3e50;
+        color: #2ecc71;
+    }
+    .tab-btn.active {
+        box-shadow: inset 0 0 8px rgba(0,0,0,0.2);
+        border-bottom: 3px solid #2ecc71;
+    }
+
+    /* 🏷️ НЕБОЛЬШОЙ ВСПЛЫВАЮЩИЙ ТЕКСТ ПРИ НАВЕДЕНИИ (Tooltip) */
+    .tab-btn::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        top: 70px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        background: #334155;
+        color: white;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 6px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        z-index: 1000;
+    }
+    .tab-btn:hover::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    /* Контейнеры контента */
+    .admin-tab-content {
+        display: none;
+        animation: fadeInTab 0.3s ease;
+    }
+    .admin-tab-content.active {
+        display: block;
+    }
+    @keyframes fadeInTab {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Общие стили блоков */
+    .block { background: white; padding: 30px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 25px; }
+    .block h2 { margin-top: 0; color: #1e293b; font-size: 22px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th { background: #f8fafc; color: #475569; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 14px; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 14px; }
+    input, select, button { padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; }
+    button { background: #27ae60; color: white; font-weight: bold; border: none; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+    .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    .badge-sub { background: #e0f2fe; color: #0369a1; }
+</style>
+
+
+<!-- 🎛️ ИСПРАВЛЕННОЕ ВЕРХНЕЕ МЕНЮ С ИКОНКАМИ И ПРОВЕРКОЙ ПРАВ СУПЕРПОЛЬЗОВАТЕЛЯ -->
+<div class="admin-tabs-nav">
+    <button class="tab-btn active" data-target="tab-create" data-tooltip="Добавление товаров и категорий">🏗️</button>
+    <button class="tab-btn" data-target="tab-prices" data-tooltip="Управление товарами и ценниками">🏷️</button>
+    
+    <!-- 🛡️ Кнопка управления персоналом откроется ТОЛЬКО для Главного Админа (Вас) -->
+    {% if is_main_admin %}
+        <button class="tab-btn" data-target="tab-users" data-tooltip="Управление правами других админов">🛡️</button>
+    {% endif %}
+    
+    <button class="tab-btn" data-target="tab-orders" data-tooltip="История заказов клиентов">📦</button>
+    <button class="tab-btn" data-target="tab-tags" data-tooltip="Модерация предложенных тегов">🏷️</button>
+</div>
+
+
+<!-- ================= ВКЛАДКА 1: ДОБАВЛЕНИЕ ТОВАРОВ И КАТЕГОРИЙ ================= -->
+<div id="tab-create" class="admin-tab-content active">
+    <div class="block">
+        <h2>🏗️ Создание и расширение каталога</h2>
+        <div style="display: flex; gap: 40px; flex-wrap: wrap;">
+            
+            <!-- Левая часть: Форма создания товара -->
+            <div style="flex: 1; min-width: 300px;">
+                <h3>➕ Добавить новый товар</h3>
+                <form method="POST" action="{% url 'add_product' %}" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 10px;">
+                    {% csrf_token %}
+                    <input type="text" name="title" placeholder="Название товара (макс. 40 симв.)" required>
+                    <input type="number" step="0.01" name="price" placeholder="Цена (руб.)" required>
+                    <input type="number" name="stock" placeholder="Остаток на складе" value="0" required>
+                    
+                    <select name="category" required>
+                        <option value="">-- Выберите категорию товара --</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <!-- Блок привязки тегов с мини-поиском -->
+                    <div style="font-size: 13px; color: #475569; background: #f8fafc; padding: 10px; border-radius: 4px; border: 1px solid #cbd5e1;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 6px;">🏷️ Привязать теги к товару:</label>
+                        <input type="text" id="tag-mini-search" placeholder="🔍 Быстрый поиск тега..." style="width: 100%; box-sizing: border-box; padding: 6px; margin-bottom: 8px;">
+                        <div id="tag-checkboxes-container" style="max-height: 110px; overflow-y: auto; background: white; border: 1px solid #e2e8f0; padding: 8px; border-radius: 4px;">
+                            {% for t in tags %}
+                                <div class="tag-search-item" style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                    <input type="checkbox" name="selected_tags" value="{{ t.id }}" id="tag-cb-{{ t.id }}">
+                                    <label for="tag-cb-{{ t.id }}"># {{ t.name }}</label>
+                                </div>
+                            {% empty %}
+                                <span style="color: #94a3b8; font-style: italic;">Тегов пока нет.</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Фотографии: Главное + Мульти-галерея ракурсов -->
+                    <div style="font-size: 13px; color: #475569; background: #f8fafc; padding: 12px; border-radius: 4px; border: 1px solid #cbd5e1; display: flex; flex-direction: column; gap: 10px;">
+                        <div>
+                            <label style="font-weight: bold; display: block; margin-bottom: 4px;">📸 Главное фото товара (для витрины WB):</label>
+                            <input type="file" name="product_image" accept="image/*" required>
+                        </div>
+                        <div style="border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+                            <label style="font-weight: bold; display: block; margin-bottom: 4px;">🖼️ Дополнительные фото галереи (до 10 шт.):</label>
+                            <input type="file" name="gallery_images" accept="image/*" multiple>
+                        </div>
+                    </div>
+                    <button type="submit">Создать товар и загрузить галерею</button>
+                </form>
+            </div>
+
+            <!-- Правая часть: Форма добавления категории -->
+            <div style="flex: 1; border-left: 1px dashed #cbd5e1; padding-left: 40px; min-width: 280px;">
+                <h3>📁 Создать новую категорию</h3>
+                {% if is_main_admin %}
+                <form method="POST" action="{% url 'admin_create_category' %}" style="display: flex; flex-direction: column; gap: 10px;">
+                    {% csrf_token %}
+                    <input type="text" name="category_name" placeholder="Название категории" required>
+                    <button type="submit" style="background: #27ae60;">Создать категорию</button>
+                </form>
+                    <p style="font-size: 11px; color: #e74c3c; margin-top: 10px;">⚠️ Удаление категорий заблокировано.</p>
+                {% else %}
+                    <p style="color: #7f8c8d; font-size: 13px; font-style: italic;">Только для Главного Админа.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ================= ВКЛАДКА 2: УПРАВЛЕНИЕ ТОВАРАМИ И ЦЕННИКАМИ ================= -->
+<div id="tab-prices" class="admin-tab-content">
+    <div class="block">
+        <h2>🏷️ Управление товарами и ценниками</h2>
+        <div style="display: flex; gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1; align-items: center;">
+            <input type="text" id="table-search-input" placeholder="🔍 Введите название товара для фильтрации..." style="flex: 1; padding: 6px 10px;">
+            <select id="table-category-select" style="padding: 6px 10px; background: white;">
+                <option value="">Все категории</option>
+                {% for cat in categories %}
+                    <option value="{{ cat.name }}">{{ cat.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50px;">ID</th>
+                    <th>Название товара</th>
+                    <th style="width: 150px;">Категория</th>
+                    <th style="width: 180px;">Текущая цена</th>
+                    <th style="width: 100px;">Склад</th>
+                    <th style="width: 150px;">Действия</th>
+                </tr>
+            </thead>
+            <tbody id="products-table-body">
+                {% for product in products %}
+                <tr class="product-table-row" data-product-name="{{ product.name|lower }}" data-product-category="{{ product.category.name }}">
+                    <td>{{ product.id }}</td>
+                    <td><strong>{{ product.name }}</strong></td>
+                    <td><span class="badge badge-sub">{{ product.category.name }}</span></td>
+                    <td>
+                        {% if can_edit_price %}
+                            <form method="POST" action="{% url 'admin_update_price' product.id %}" style="display: flex; flex-direction: column; gap: 4px; margin: 0;">
+                                {% csrf_token %}
+                                
+                                <!-- Текст-подсказка с изначальной ценой товара из базы данных -->
+                                <div style="font-size: 12px; color: #64748b; font-weight: 500;">
+                                    Сейчас: <span style="color: #2c3e50; font-weight: bold;">{{ product.details.price }} руб.</span>
+                                </div>
+                                
+                                <div style="display: flex; gap: 5px; align-items: center;">
+                                    <input type="number" step="0.01" name="price" value="{{ product.details.price }}" placeholder="Новая цена" required style="width: 90px; padding: 4px; font-size: 13px;">
+                                    <button type="submit" style="padding: 4px 8px; font-size: 12px; background: #2c3e50;">Обновить</button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <span style="font-weight: bold; color: #2c3e50;">{{ product.details.price }} руб.</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ product.details.stock }} шт.</td>
+                    <td>
+                        {% if is_main_admin %}
+                            <a href="{% url 'delete_product' product.id %}" style="color: white; background: #e74c3c; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold;" onclick="return confirm('Удалить товар?')">🗑️ Удалить</a>
+                        {% else %}
+                            <span style="color: #95a5a6; font-size: 12px; font-style: italic;">Запрещено</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- ================= ВКЛАДКА 3: УПРАВЛЕНИЕ ПРАВАМИ АДМИНОВ ================= -->
+<div id="tab-users" class="admin-tab-content">
+    <div class="block">
+        <h2>🛡️ Управление персоналом и правами доступа</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Сотрудник</th>
+                    <th>Статус</th>
+                    <th>Права изменения цен</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td><strong>{{ u.username }}</strong><br><small style="color: #7f8c8d;">{{ u.email }}</small></td>
+                    <td>
+                        {% if u.is_superuser %}<span class="badge" style="background:#e74c3c; color:white;">Главный Админ</span>
+                        {% elif u.is_staff %}<span class="badge" style="background:#3498db; color:white;">Менеджер</span>
+                        {% else %}<span class="badge" style="background:#95a5a6; color:white;">Покупатель</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if u.is_superuser %}✅ Полный доступ (Главный)
+                        {% elif u.is_staff %}
+                            {% if u.user_permissions.all %}<span style="color:#27ae60; font-weight:bold;">🟢 Разрешено</span>{% else %}<span style="color:#e74c3c; font-weight:bold;">🔴 Заблокировано</span>{% endif %}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% if is_main_admin and not u.is_superuser and u.is_staff %}
+                            <a href="{% url 'admin_toggle_permission' u.id %}" style="background:#2c3e50; color:white; padding:6px 12px; border-radius:4px; text-decoration:none; font-size:12px; font-weight:bold;">Переключить тумблер цен</a>
+                        {% else %}<span style="color:#95a5a6; font-size:12px;">Нет доступных действий</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ================= ВКЛАДКА 4: ИСТОРИЯ И ЖИВОЙ ПОИСК ЗАКАЗОВ (ИСПРАВЛЕНО) ================= -->
+<div id="tab-orders" class="admin-tab-content">
+    <div class="block">
+        <h2>📦 Управление заказами покупателей</h2>
+        
+        <!-- 🔍 Панель живого поиска по купленным товарам -->
+        <div style="margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
+            <input type="text" id="order-search-input" placeholder="🔍 Введите название товара для поиска по накладным заказов..." style="width: 100%; box-sizing: border-box; padding: 8px 12px;">
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Заказ / Покупатель</th>
+                    <th>Содержимое заказа</th>
+                    <th>Статус оплаты</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody id="orders-table-body">
+                {% for order in orders %}
+                <!-- Каждой строке даем дата-атрибут со списком всех товаров внутри заказа для легкого поиска -->
+                <tr class="order-table-row" data-order-items="{% for item in order.items.all %}{{ item.product.name|lower }} {% endfor %}">
+                    <td><strong>Заказ №{{ order.id }}</strong><br><small>IP: {{ order.ip_address }}</small></td>
+                    <td>
+                        <ul style="margin:0; padding-left:15px; font-size:13px;">
+                            {% for item in order.items.all %}
+                                <li>{{ item.product.name }} x {{ item.quantity }} шт.</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>
+                        {% if order.is_paid %}
+                            <span style="color:#27ae60; font-weight:bold;">🟢 Оплачен банковской картой</span>
+                        {% else %}
+                            <span style="color:#d35400; font-weight:bold;">⏳ Ожидает транзакции</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not order.is_paid %}
+                            <a href="{% url 'admin_cancel_order' order.id %}" style="background:#e67e22; color:white; padding:4px 8px; border-radius:4px; text-decoration:none; font-size:12px; font-weight:bold;">❌ Отменить</a>
+                        {% endif %}
+                        {% if is_main_admin %}
+                            <a href="{% url 'admin_delete_order' order.id %}" style="background:#e74c3c; color:white; padding:4px 8px; border-radius:4px; text-decoration:none; font-size:12px; margin-left:5px; font-weight:bold;" onclick="return confirm('Стереть заказ?')">🗑️ Стереть</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align:center; color:#7f8c8d; font-style:italic;">Заказов в системе еще не было.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+<!-- ================= ВКЛАДКА 5: МОДЕРАЦИЯ ТЕГОВ + МЕДИАЦЕНТР ФОТОГРАФИЙ (ОБНОВЛЕНО) ================= -->
+<div id="tab-tags" class="admin-tab-content">
+    <div class="block" style="display: flex; gap: 30px; flex-wrap: wrap;">
+        
+        <!-- 1. ЗОНА (Слева): Таблица модерации тегов от покупателей -->
+        <div style="flex: 1.5; min-width: 300px;">
+            <h2>📝 Модерация тегов пользователей</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Тег</th>
+                        <th>Товар</th>
+                        <th>Действие</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in tag_proposals %}
+                    <tr>
+                        <td><span class="badge" style="background:#34495e; color:white;"># {{ p.name }}</span></td>
+                        <td><strong>{{ p.product.name }}</strong></td>
+                        <td><a href="{% url 'admin_approve_tag' p.id %}" style="background:#27ae60; color:white; padding:5px 10px; border-radius:4px; text-decoration:none; font-size:11px; font-weight:bold;">✅ Одобрить</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" style="text-align:center; color:#7f8c8d; font-style:italic;">Очередь предложений пуста.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="margin-top: 30px; border-top: 1px dashed #cbd5e1; padding-top: 20px;">
+                <h3>➕ Создать тег в глобальную базу</h3>
+                <form method="POST" action="{% url 'admin_propose_tag' %}" style="display: flex; flex-direction: column; gap: 8px;">
+                    {% csrf_token %}
+                    <input type="text" name="tag_name" placeholder="Название тега (например: Тренд2026)" required style="padding: 6px;">
+                    <input type="hidden" name="product_id" value=""> 
+                    <button type="submit" style="background: #34495e; color: white; padding: 6px;">Создать тег в базу</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 📸 2. ЗОНА (Справа): ИНТЕРАКТИВНЫЙ РЕДАКТОР ФОТОГРАФИЙ ТОВАРА С ПОИСКОМ -->
+        <div style="flex: 2; min-width: 350px; border-left: 1px dashed #cbd5e1; padding-left: 30px;">
+            <h2>📸 Центр управления медиафайлами и фото</h2>
+            
+            <!-- Поле мгновенного поиска товара для редактирования изображений -->
+            <div style="margin-bottom: 15px;">
+                <label style="font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #475569;">1. Найдите товар по названию:</label>
+                <input type="text" id="photo-product-search" placeholder="🔍 Введите имя товара для настройки его фотографий..." style="width: 100%; box-sizing: border-box; padding: 8px;">
+            </div>
+
+            <!-- Список товаров с их фотками, который фильтруется на лету -->
+            <div id="photo-editors-list" style="max-height: 480px; overflow-y: auto; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 15px;">
+                {% for product in products %}
+                <div class="photo-edit-card" data-name="{{ product.name|lower }}" style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; display: flex; flex-direction: column; gap: 10px;">
+                    <div style="font-weight: bold; font-size: 15px; color: #1e293b; border-bottom: 1px solid #f1f5f9; padding-bottom: 4px;">
+                        📦 {{ product.name }} <span style="font-weight: normal; color:#64748b; font-size:12px;">(ID: {{ product.id }})</span>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; align-items: flex-start;">
+                        <!-- Текущее состояние картинки товара -->
+                        <div style="width: 80px; height: 100px; background: #f1f5f9; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #e2e8f0; flex-shrink: 0;">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <span style="font-size: 24px;">📦</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Формы и кнопки действий над главным изображением -->
+                        <div style="flex: 1; display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Форма загрузки/обновления фото -->
+                            <form method="POST" action="{% url 'admin_update_product_photo' product.id %}" enctype="multipart/form-data" style="display: flex; gap: 6px; align-items: center; margin: 0;">
+                                {% csrf_token %}
+                                <input type="file" name="product_image" accept="image/*" required style="font-size: 11px; padding: 2px; width: 130px;">
+                                <button type="submit" style="padding: 4px 8px; font-size: 11px; background: #2980b9;">Обновить фото</button>
+                            </form>
+
+                            <!-- Кнопка полного удаления главного изображения -->
+                            {% if product.image %}
+                                <a href="{% url 'admin_delete_product_photo' product.id %}?type=main" style="color: #e74c3c; font-size: 12px; font-weight: bold; text-decoration: none; display: inline-block; margin-top: 2px;" onclick="return confirm('Вы уверены, что хотите полностью стереть главное фото? Товар вернется к иконке коробки.')">🗑️ Удалить главную картинку</a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Вывод ракурсов галереи (если они загружены) для выборочного удаления -->
+                    {% if product.images.all %}
+                        <div style="border-top: 1px dashed #e2e8f0; padding-top: 8px; margin-top: 4px;">
+                            <span style="font-size: 12px; font-weight: bold; color: #475569; display: block; margin-bottom: 4px;">🖼️ Дополнительные ракурсы галереи:</span>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                {% for extra in product.images.all %}
+                                    <div style="position: relative; width: 45px; height: 55px; border-radius: 4px; overflow: hidden; border: 1px solid #cbd5e1;">
+                                        <img src="{{ extra.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <a href="{% url 'admin_delete_product_photo' product.id %}?type=gallery&image_id={{ extra.id }}" style="position: absolute; top: 0; right: 0; left: 0; bottom: 0; background: rgba(231,76,60,0.85); color: white; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 11px; font-weight: bold; opacity: 0; transition: opacity 0.15s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0" onclick="return confirm('Удалить этот ракурс из галереи?')">❌</a>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================= ⚡ ГЛАВНЫЙ СКРИПТ УПРАВЛЕНИЯ ПАНЕЛЬЮ АДМИНА ⚡ ================= -->
+<script>
+    // 1. ЛОГИКА МГНОВЕННОГО ПЕРЕКЛЮЧЕНИЯ ВКЛАДОК (TABS) БЕЗ ПЕРЕЗАГРУЗКИ СТРАНИЦЫ
+    const buttons = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.admin-tab-content');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-target');
+
+            // Сбрасываем подсветку у всех кнопок и скрываем весь контент
+            buttons.forEach(b => b.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+
+            // Зажигаем кликнутую иконку и плавно выводим нужную вкладку на экран
+            btn.classList.add('active');
+            document.getElementById(target).classList.add('active');
+        });
+    });
+
+    // ⚡ ИСПРАВЛЕНИЕ: Сюда мы дописываем вторую часть скрипта, чтобы живой мини-поиск тегов не ломался
+    document.getElementById('tag-mini-search').addEventListener('input', function() {
+        let filter = this.value.toLowerCase();
+        let items = document.getElementsByClassName('tag-search-item');
+        
+        for (let i = 0; i < items.length; i++) {
+            let label = items[i].getElementsByTagName('label');
+            // Индекс [0] гарантирует, что JS прочитает текст внутри тега <label>
+            let labelText = label[0] ? label[0].textContent.toLowerCase() : "";
+            
+            if (labelText.includes(filter)) {
+                items[i].style.display = "flex";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+    });
+
+
+    // ⚡ ВОТ СЮДА ВСТАВЛЯЕМ НАШ 4-Й БЛОК ЛОГИКИ ЖИВОГО ПОИСКА ЗАКАЗОВ:
+    document.getElementById('order-search-input').addEventListener('input', function() {
+        let filter = this.value.toLowerCase();
+        let rows = document.getElementsByClassName('order-table-row');
+        
+        for (let i = 0; i < rows.length; i++) {
+            let orderItems = rows[i].getAttribute('data-order-items');
+            
+            // Если в списке покупок этого заказа есть искомый товар — показываем строку
+            if (orderItems.includes(filter)) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    });
+    // =========================================================================
+
+
+    // 5. ЛОГИКА ЖИВОГО МИНИ-ПОИСКА ТОВАРОВ ВНУТРИ МЕДИАЦЕНТРА (ВКЛАДКА 5)
+    document.getElementById('photo-product-search').addEventListener('input', function() {
+        let filter = this.value.toLowerCase();
+        let cards = document.getElementsByClassName('photo-edit-card');
+        
+        for (let i = 0; i < cards.length; i++) {
+            let cardName = cards[i].getAttribute('data-name');
+            
+            // Если имя товара совпало с фильтром — оставляем карточку, иначе скрываем
+            if (cardName.includes(filter)) {
+                cards[i].style.display = "flex";
+            } else {
+                cards[i].style.display = "none";
+            }
+        }
+    });
+
+    
+</script> <!-- Тег script закрывается строго после этого поиска -->
+
+{% endblock %} <!-- Финал файла Django -->
+    

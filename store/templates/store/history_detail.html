@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}История просмотров — ZoneShop{% endblock %}
+
+{% block content %}
+<style>
+    .page-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
+    .card { border: 1px solid #e2e8f0; padding: 15px; background: #f8fafc; border-radius: 8px; text-align: center; }
+</style>
+
+<div class="page-box">
+    <h2>👁️ Журнал ваших просмотров</h2>
+    <p style="color: #64748b; font-size: 13px; margin: 0;">Здесь хранятся последние товары, которые вы изучали. Список автоматически обнулится, как только наберется 100 товаров.</p>
+
+    {% if history %}
+        <div class="grid">
+            {% for history_item in history %}
+                <div class="card">
+                    <span style="font-size: 32px; display: block; margin-bottom: 5px;">📦</span>
+                    <h3 style="margin: 5px 0;"><a href="{% url 'product_detail' history_item.product.id %}" style="color: #3498db; text-decoration: none;">{{ history_item.product.name }}</a></h3>
+                    {% if history_item.product.details %}
+                        <strong style="color: #334155; display: block; margin-bottom: 10px;">{{ history_item.product.details.price }} руб.</strong>
+                    {% endif %}
+                    <span style="font-size: 11px; color: #94a3b8;">Смотрели: {{ history_item.viewed_at|date:"d.m в H:i" }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="color: #7f8c8d; margin-top: 20px; font-style: italic;">Журнал просмотров пуст. Откройте любой товар через кнопку «Посмотреть» на <a href="{% url 'index' %}">главной</a>.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,8 +1,11 @@
+# shopzone/settings.py
+
 import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -55,11 +58,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'store.context_processors.footer_contact',
+
+                'store.context_processors.global_store_data',
             ],
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'shopzone.wsgi.application'
 
@@ -98,9 +103,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -111,6 +116,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Базовый URL для открытия картинок в браузере
+MEDIA_URL = '/media/'
+
+# Физический путь к папке media на вашем компьютере
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
@@ -156,3 +167,15 @@ LOGGING = {
         },
     },
 }
+
+
+
+# 🔐 НАСТРОЙКИ КИБЕРБЕЗОПАСНОСТИ СЕССИЙ АДМИНИСТРАТОРОВ
+# Время жизни сессии в секундах (2 часа = 120 минут = 7200 секунд)
+SESSION_COOKIE_AGE = 7200
+
+# Сессия закрывается автоматически, как только админ закроет вкладку браузера
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Django будет автоматически обновлять куки при каждом действии, отсчитывая 2 часа заново
+SESSION_SAVE_EVERY_REQUEST = True

@@ -3,56 +3,90 @@
 {% block title %}Ваша корзина — ZoneShop{% endblock %}
 
 {% block content %}
-    <h2>🛒 Ваша корзина</h2>
+<style>
+    .cart-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+    .cart-title { font-size: 24px; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+    .cart-subtitle { font-size: 13px; color: #64748b; margin-bottom: 25px; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: inline-block; }
+    .cart-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+    .cart-table th { background: #f8fafc; color: #475569; font-weight: 600; padding: 14px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 14px; }
+    .cart-table td { padding: 16px; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #334155; vertical-align: middle; }
+    .row-unchecked { opacity: 0.55; background-color: #f8fafc; }
+    .btn-toggle-box { text-decoration: none; font-size: 22px; cursor: pointer; display: inline-block; }
+    .product-info-name { font-weight: 600; color: #1e293b; }
+    .price-tag { font-weight: 600; color: #0f172a; }
+    .quantity-badge { background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; }
+    .btn-delete-item { color: #e74c3c; text-decoration: none; font-size: 13px; font-weight: bold; }
+    .btn-delete-item:hover { text-decoration: underline; }
+    .checkout-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+    .btn-checkout { padding: 12px 28px; background: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(40,167,69,0.2); }
+    .btn-checkout:hover { background: #218838; }
+    .back-link { color: #64748b; text-decoration: none; font-size: 14px; font-weight: 500; }
+    .cart-empty { text-align: center; padding: 20px; color: #64748b; }
+    .cart-empty a { color: #3182ce; text-decoration: none; font-weight: bold; }
+</style>
+
+<div class="cart-container">
+    <div class="cart-title">🛒 Ваша корзина</div>
+    <div class="cart-subtitle">🕒 Внимание: гостевая корзина автоматически очищается каждые 24 часа.</div>
 
     {% if cart and cart.items.all %}
-        <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; width: 100%;">
+        <table class="cart-table">
             <thead>
-                <tr style="background-color: #f2f2f2;">
-                    <th>Товар</th>
-                    <th>Цена</th>
-                    <th>Количество</th>
-                    <th>Сумма</th>
+                <tr>
+                    <th style="width: 80px; text-align: center;">Купить</th>
+                    <th>Название товара</th>
+                    <th style="width: 150px;">Цена</th>
+                    <th style="width: 120px;">Количество</th>
+                    <th style="width: 100px; text-align: center;">Действие</th> <!-- Новый столбец -->
                 </tr>
             </thead>
             <tbody>
                 {% for item in cart.items.all %}
-                    <tr>
-                        <td>{{ item.product.name }}</td>
-                        <td>
-                            {% if item.product.details %}
-                                {{ item.product.details.price }} руб.
-                            {% else %}
-                                Цена не указана
-                            {% endif %}
+                    <tr class="{% if not item.is_checked %}row-unchecked{% endif %}">
+                        <td style="text-align: center;">
+                            <a href="{% url 'toggle_cart_item' item.id %}" class="btn-toggle-box" title="Включить/исключить из заказа">
+                                {% if item.is_checked %}🟩{% else %}⬜{% endif %}
+                            </a>
                         </td>
-                        <td>{{ item.quantity }} шт.</td>
                         <td>
-                            {% if item.product.details %}
-                                {# Django не умеет умножать в шаблонах без кастомных фильтров, поэтому мы можем просто вывести структуру, либо оставить расчет на бэкенд. Но для наглядности выведем информацию #}
-                                {{ item.quantity }} x {{ item.product.details.price }} руб.
-                            {% else %}
-                                —
-                            {% endif %}
+                            <div class="product-info-name">{{ item.product.name }}</div>
+                        </td>
+                        <td>
+                            <span class="price-tag">
+                                {% if item.product.details %}
+                                    {{ item.product.details.price }} руб.
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="quantity-badge">{{ item.quantity }} шт.</span>
+                        </td>
+                        <td style="text-align: center;">
+                            <!-- Кнопка полного удаления товара из корзины гостя -->
+                            <a href="{% url 'remove_from_cart' item.product.id %}" class="btn-delete-item" onclick="return confirm('Удалить этот товар из корзины?')">❌ Удалить</a>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <br>
-        <div style="text-align: right;">
-            <form action="{% url 'checkout' %}" method="POST" style="display: inline-block;">
+        <div class="checkout-footer">
+            <a href="{% url 'index' %}" class="back-link">← Вернуться к покупкам</a>
+            
+            <form action="{% url 'checkout' %}" method="POST" style="margin: 0;">
                 {% csrf_token %}
-                <button type="submit" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer; font-size: 16px;">
-                    💳 Оплатить заказ
+                <button type="submit" class="btn-checkout">
+                    💳 Оплатить выбранные товары
                 </button>
             </form>
         </div>
     {% else %}
-        <p>Ваша корзина пуста. Добавьте что-нибудь со <a href="{% url 'index' %}">главной страницы</a>!</p>
+        <div class="cart-empty">
+            <p style="font-size: 16px;">Ваша корзина совершенно пуста.</p>
+            <p style="font-size: 14px;">Выберите подходящие новинки на <a href="{% url 'index' %}">главной странице каталога</a>!</p>
+        </div>
     {% endif %}
-
-    <br>
-    <a href="{% url 'index' %}">← Вернуться к покупкам</a>
+</div>
 {% endblock %}

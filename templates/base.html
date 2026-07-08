@@ -4,45 +4,260 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ZoneShop{% endblock %}</title>
+    <style>
+        /* Глобальные настройки */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
+            margin: 0; 
+            padding: 0 0 80px 0; /* Важно: отступ снизу, чтобы контент не перекрывался закрепленным меню */
+            background-color: #f4f6f9; 
+            color: #333; 
+        }
+        
+        /* 🔝 ВЕРХНЯЯ ШАПКА: На всю длину */
+        header { 
+            background: #1a252f; 
+            color: white; 
+            padding: 20px 30px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end; /* О нас прижато к нижнему краю зоны шапки */
+        }
+        .site-logo {
+            margin: 0; 
+            font-size: 28px; 
+            letter-spacing: 1.5px; 
+            font-weight: 800;
+            color: white;
+            cursor: pointer;
+        }
+        .about-top-link {
+            color: #94a3b8; 
+            text-decoration: none; 
+            font-size: 14px; 
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .about-top-link:hover {
+            color: #f39c12;
+        }
+        
+        /* 📦 ОСНОВНОЙ КОНТЕНТ */
+        main { 
+            padding: 30px; 
+            min-height: 400px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+        }
+
+        /* 📱 ЗАКРЕПЛЕННОЕ НИЖНЕЕ МЕНЮ (Floating Bottom Navigation) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            background: #1a252f;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            z-index: 9999; /* Поверх всех элементов при скролле */
+        }
+        .bottom-nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            transition: color 0.2s;
+            position: relative;
+        }
+        .bottom-nav-link:hover {
+            color: #f39c12;
+        }
+        .bottom-nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        
+        /* Индикатор количества товаров в корзине */
+        .cart-badge {
+            background: #28a745; 
+            color: white; 
+            padding: 1px 6px; 
+            border-radius: 10px; 
+            font-size: 10px; 
+            font-weight: bold; 
+            position: absolute;
+            top: -4px;
+            right: -12px;
+        }
+
+        /* 📞 ПОДВАЛ (КОНТАКТЫ): Строго под контентом, перед нижним закрепленным меню */
+        footer { 
+            background: #ffffff; 
+            color: #475569; 
+            padding: 30px; 
+            text-align: center; 
+            font-size: 14px; 
+            border-top: 1px solid #e2e8f0;
+            margin-top: 60px;
+        }
+        footer h3 { color: #1e293b; margin: 0 0 10px 0; font-size: 18px; }
+        footer p { margin: 6px 0; }
+
+        /* ⏱️ Стили парящего полупрозрачного таймера безопасности */
+        .session-timer-box {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(30, 41, 59, 0.75); /* Полупрозрачный темный фон */
+            backdrop-filter: blur(4px); /* Эффект матового стекла */
+            color: #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: bold;
+            font-family: monospace;
+            z-index: 10000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            pointer-events: none; /* Таймер не мешает кликать по элементам под ним */
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+        /* Анимация мигания, когда время на исходе */
+        @keyframes timerPulse {
+            0% { background: rgba(231, 76, 60, 0.8); transform: scale(1); }
+            50% { background: rgba(231, 76, 60, 1); transform: scale(1.03); }
+            100% { background: rgba(231, 76, 60, 0.8); transform: scale(1); }
+        }
+
+
+    </style>
 </head>
+
+
+
+
 <body>
 
-    <!-- ВЕРХНЯЯ ЧАСТЬ -->
-    <header>
-        <h1>ZoneShop</h1>
-        <nav>
-            <!-- Ссылки на ваши функции из views.py. Имена (name) должны совпадать с вашим urls.py -->
-            <a href="{% url 'index' %}">Главная</a> | 
-            <a href="{% url 'add_product' %}">Добавить товар</a> | 
-            <a href="{% url 'about' %}">О нас</a>
-        </nav>
-    </header>
-    
-    <hr>
 
-    <!-- ОСНОВНОЙ КОНТЕНТ -->
+    <!-- ВЕРХНЯЯ ШАПКА: ИМЯ НА ВСЮ ДЛИНУ И "О НАС" СНИЗУ СПРАВА -->
+    <header>
+        <div class="header-content">
+            <h1 class="site-logo" onclick="window.location.href='/'">ZoneShop ⚡</h1>
+            <a href="{% url 'about' %}" class="about-top-link">О нас</a>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ СТРАНИЦЫ -->
     <main>
         {% block content %}
         {% endblock %}
     </main>
 
-    <hr>
-
-    <!-- НИЖНЯЯ ЧАСТЬ (ФУТЕР) -->
+    <!-- КОНТАКТЫ МАГАЗИНА: ИДУТ СЛЕДОМ ЗА КОНТЕНТОМ ПЕРЕД ЗАКРЕПЛЕННОЙ ПАНЕЛЬЮ -->
     <footer>
-        <!-- НИЖНЯЯ ЧАСТЬ (ФУТЕР) -->
-        <footer>
-            <h3>Контакты ZoneShop:</h3>
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <h3>Контакты магазина ZoneShop</h3>
             {% if footer_contact_data %}
-                <p>Телефон: {{ footer_contact_data.phone }}</p>
-                <p>Email: {{ footer_contact_data.email }}</p>
-                <p>Адрес: {{ footer_contact_data.address }}</p>
+                <p>📞 Телефон: <strong>{{ footer_contact_data.phone }}</strong> | ✉️ Email: <strong>{{ footer_contact_data.email }}</strong></p>
+                <p>📍 Адрес: {{ footer_contact_data.address }}</p>
             {% else %}
-                <p>Контакты еще не заполнены в админке.</p>
+                <p style="font-style: italic; color: #94a3b8;">Данные контактов временно обновляются администрацией.</p>
             {% endif %}
-        </footer>
-    
+            <p style="font-size: 11px; color: #94a3b8; margin-top: 10px;">&copy; 2026 ZoneShop. Все права защищены.</p>
+        </div>
     </footer>
+
+    <!-- 🔒 ЗАКРЕПЛЕННОЕ НИЖНЕЕ МЕНЮ: Всегда на экране в вашем точном порядке -->
+    <div class="bottom-nav">
+        <!-- 1. Просмотренное -->
+        <a href="{% url 'history_detail' %}" class="bottom-nav-link">
+            <span class="bottom-nav-icon">👁️</span>
+            <span>Просмотренное</span>
+        </a>
+        
+        <!-- 2. Отмеченное -->
+        <a href="{% url 'wishlist_detail' %}" class="bottom-nav-link">
+            <span class="bottom-nav-icon">⭐</span>
+            <span>Отмеченное</span>
+        </a>
+        
+        <!-- 3. Корзина (с динамической цифрой внутри зеленого кружка) -->
+        <a href="{% url 'cart_detail' %}" class="bottom-nav-link">
+            <span class="bottom-nav-icon">🛒</span>
+            <span>Корзина</span>
+            <span class="cart-badge">{{ cart_total_quantity }}</span>
+        </a>
+        
+        <!-- 4. Главная -->
+        <a href="{% url 'index' %}" class="bottom-nav-link" style="color: #f39c12;">
+            <span class="bottom-nav-icon">🏠</span>
+            <span>Главная</span>
+        </a>
+    </div>
+
+    {% if request.user.is_staff %}
+    <!-- Парящий блок таймера сессии -->
+    <div id="session-timer" class="session-timer-box">
+        🔑 Сессия: <span id="session-countdown">120:00</span>
+    </div>
+
+    <script>
+        // Устанавливаем время в секундах (2 часа = 7200 секунд)
+        let timeLeft = 7200; 
+        let hasAlerted = false;
+
+        const timerBox = document.getElementById('session-timer');
+        const countdownSpan = document.getElementById('session-countdown');
+
+        function updateSessionTimer() {
+            if (timeLeft <= 0) {
+                // Время вышло — принудительно выкидываем из аккаунта на страницу входа
+                window.location.href = "{% url 'admin_dashboard' %}"; // Перенаправит на login декоратором
+                return;
+            }
+
+            timeLeft--;
+
+            // Считаем минуты и секунды
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+
+            // Форматируем вывод (добавляем нули, если число меньше 10)
+            let displayMin = minutes < 10 ? '0' + minutes : minutes;
+            let displaySec = seconds < 10 ? '0' + seconds : seconds;
+
+            countdownSpan.textContent = `${displayMin}:${displaySec}`;
+
+            // ⚠️ УВЕДОМЛЕНИЕ ЗА 10 МИНУТ (600 секунд)
+            if (timeLeft <= 600 && !hasAlerted) {
+                hasAlerted = true;
+                // Включаем агрессивный красный цвет и пульсацию таймера
+                timerBox.style.animation = "timerPulse 1.5s infinite";
+                timerBox.style.color = "#ffffff";
+                
+                // Выводим всплывающее браузерное предупреждение
+                alert("⚠️ Внимание! Ваша административная сессия истекает через 10 минут. Пожалуйста, сохраните изменения, чтобы не потерять данные, или обновите страницу для продления сессии!");
+            }
+        }
+
+        // Обновляем таймер каждую секунду
+        setInterval(updateSessionTimer, 1000);
+    </script>
+{% endif %}
 
 </body>
 </html>

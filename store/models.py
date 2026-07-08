@@ -1,7 +1,33 @@
+from datetime import timedelta
+from django.utils import timezone
+
 import secrets
 import string
 from django.core.validators import MinLengthValidator  
 from django.db import models
+from django.contrib.auth.models import User
+
+
+# Профиль администратора для контроля спец-доступов
+class AdminProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
+    can_change_prices = models.BooleanField(default=False, verbose_name="Разрешено менять цены")
+
+    def __str__(self):
+        return f"Права админа для: {self.user.username}"
+
+
+class TagProposal(models.Model):
+    name = models.CharField(max_length=50, verbose_name="Предложенный тег")
+    
+    # ИСПРАВЛЕНИЕ: Обернули Product в одинарные кавычки
+    product = models.ForeignKey('Product', on_delete=models.CASCADE, verbose_name="К какому товару привязать")
+    
+    proposed_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Кто предложил")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Тег '{self.name}' для {self.product.name}"
 
 
 class Category(models.Model):
@@ -29,16 +55,19 @@ class Tag(models.Model):
 
 
     def save(self, *args, **kwargs):
-        is_new = self.pk is None
+        # Теперь timezone берется из django.utils и метод .now() отработает идеально!
+        now = timezone.now()
+        if self.pk and self.created_at < now - timedelta(days=1):
+            self.items.all().delete()
+            self.created_at = now
         super().save(*args, **kwargs)
-        
-        # ManyToManyField можно заполнять только ПОСЛЕ того, как объект сохранен в БД (получил ID)
-        if is_new and not self.tags.exists():
-            default_tag, created = Tag.objects.get_or_create(name="Общий")
-            self.tags.add(default_tag)
 
 
-# --- ОБНОВЛЕННАЯ МОДЕЛЬ ТОВАРА ---
+
+
+
+
+# --- ОБНОВЛЕННАЯ МОДЕЛЬ ТОВАРА С ПОДДЕРЖКОЙ ФОТО ---
 class Product(models.Model):
     name = models.CharField(
         max_length=40, 
@@ -63,6 +92,15 @@ class Product(models.Model):
         auto_now_add=True, 
         verbose_name="Дата добавления"
     )
+    
+    # ⚡ ДОБАВИЛИ ПОЛЕ КАРТИНКИ: null=True и blank=True обязательны, 
+    # чтобы старые товары в вашей БД не сломались из-за отсутствия фото!
+    image = models.ImageField(
+        upload_to='products/', 
+        blank=True, 
+        null=True, 
+        verbose_name="Изображение товара"
+    )
 
     class Meta:
         verbose_name = "Товар"
@@ -70,6 +108,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
 
 
 # --- 3. НОВАЯ СИСТЕМА ОЦЕНОК И АНКЕТНЫХ ОТЗЫВОВ ---
@@ -134,18 +173,31 @@ class StoreContact(models.Model):
 # --- ЛОГИКА ДЛЯ ГОРЯЧЕЙ КОРЗИНЫ ГОСТЕЙ ---
 
 class Cart(models.Model):
-    # Привязываем корзину к IP-адресу гостя
     ip_address = models.GenericIPAddressField(unique=True, db_index=True, verbose_name="IP-адрес гостя")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     def __str__(self):
         return f"Корзина для IP: {self.ip_address}"
 
+    # ⚡ Оптимизация 3: Очистка срабатывает только при изменении корзины!
+    def save(self, *args, **kwargs):
+        # Теперь timezone берется из django.utils и метод .now() отработает идеально!
+        now = timezone.now()
+        if self.pk and self.created_at < now - timedelta(days=1):
+            self.items.all().delete()
+            self.created_at = now
+        super().save(*args, **kwargs)
+
+
+
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items", verbose_name="Корзина")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товар")
     quantity = models.PositiveIntegerField(default=1, verbose_name="Количество")
+    
+    # ⚡ ВОТ ЭТА СТРОЧКА ДОЛЖНА ТУТ СТОЯТЬ:
+    is_checked = models.BooleanField(default=True, verbose_name="Выбран для покупки")
 
     class Meta:
         # Исключаем дублирование одного товара в одной корзине
@@ -190,3 +242,64 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.product_name} x {self.quantity} в заказе {self.order.unique_code}"
+
+# --- НОВАЯ СИСТЕМА ДЛЯ ОТМЕЧЕННОГО (ИЗБРАННОГО) С ТАЙМЕРОМ НА СУТКИ ---
+class WishList(models.Model):
+
+    ip_address = models.GenericIPAddressField(unique=True, db_index=True, verbose_name='IP-адрес гостя')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Список желаний для IP: {self.ip_address}"
+
+
+class WishlistItem(models.Model):
+    wishlist = models.ForeignKey(WishList, on_delete=models.CASCADE, related_name='items', verbose_name='Избранное')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Товар')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата добавления')
+    
+    class Meta:
+        unique_together = ('wishlist', 'product')
+        
+    def __str__(self):
+
+        return f'{self.product.name} в избранном у {self.wishlist.ip_address}'
+
+
+# --- НОВАЯ СИСТЕМА ПРОСМОТРЕННОГО (ЛИМИТ 100 СТРОК) ---
+class RecentlyViewed(models.Model):
+    ip_address = models.GenericIPAddressField(db_index=True, verbose_name='IP-адрес')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name='Товар') # Исправлено: ForeignKey
+    viewed_at = models.DateTimeField(auto_now=True, verbose_name='Дата просмотра') # Названо viewed_at для работы сортировки
+    
+    class Meta:
+        ordering = ['-viewed_at']
+        unique_together = ('ip_address', 'product')
+        
+
+    def __str__(self):
+        return f'{self.ip_address} - {self.product.name}'
+
+
+
+# --- МОДЕЛЬ ГАЛЕРЕИ ДОПОЛНИТЕЛЬНЫХ ФОТО (ДО 10 ШТУК) ---
+class ProductImage(models.Model):
+    product = models.ForeignKey(
+        Product, 
+        on_delete=models.CASCADE, 
+        related_name="images", 
+        verbose_name="Товар"
+    )
+    image = models.ImageField(
+        upload_to='products/gallery/', 
+        verbose_name="Дополнительное фото"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Фотография галереи"
+        verbose_name_plural = "Галерея фотографий"
+
+    def __str__(self):
+        return f"Фото для {self.product.name} (ID: {self.id})"

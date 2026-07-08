@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.name }} — ZoneShop{% endblock %}
+
+{% block content %}
+<style>
+    /* Современные стили для карточки товара */
+    .detail-container {
+        display: flex;
+        gap: 40px;
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+    }
+    .detail-media {
+        flex: 1;
+        min-width: 300px;
+        background: #f8fafc;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 350px;
+        border: 1px dashed #cbd5e1;
+    }
+    .media-placeholder {
+        text-align: center;
+        color: #94a3b8;
+    }
+    .detail-info {
+        flex: 1;
+        min-width: 300px;
+        display: flex;
+        flex-direction: column;
+    }
+    .meta-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .category-label {
+        background: #eff6ff;
+        color: #1e40af;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+    .tag-label {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+    .product-title {
+        font-size: 32px;
+        color: #0f172a;
+        margin: 0 0 10px 0;
+        font-weight: 700;
+    }
+    .detail-date {
+        font-size: 13px;
+        color: #94a3b8;
+        margin-bottom: 25px;
+    }
+    .price-card {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 30px;
+    }
+    .price-amount {
+        font-size: 28px;
+        color: #0f172a;
+        font-weight: 800;
+        display: block;
+    }
+    .stock-status {
+        font-size: 13px;
+        color: #2563eb;
+        margin: 6px 0 0 0;
+        font-weight: 500;
+    }
+    .actions-row {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    .btn-main-buy {
+        flex: 2;
+        padding: 14px 20px;
+        background: #28a745;
+        color: white;
+        text-decoration: none;
+        text-align: center;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 16px;
+        box-shadow: 0 4px 12px rgba(40,167,69,0.2);
+        transition: background 0.2s;
+    }
+    .btn-main-buy:hover { background: #218838; }
+    
+    .btn-main-wish {
+        flex: 1;
+        padding: 14px 20px;
+        background: #fff;
+        color: #334155;
+        text-decoration: none;
+        text-align: center;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 15px;
+        border: 1px solid #cbd5e1;
+        transition: background 0.2s;
+    }
+    .btn-main-wish:hover { background: #f8fafc; }
+
+    /* Блок отзывов-анкет */
+    .reviews-section {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0;
+    }
+    .review-card {
+        border-bottom: 1px solid #e2e8f0;
+        padding: 20px 0;
+    }
+    .review-card:last-child { border-bottom: none; }
+    .review-meta {
+        display: flex;
+        justify-content: space-between;
+        color: #64748b;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+    .score-badge {
+        background: #f0fdf4;
+        color: #166534;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 13px;
+    }
+    .answers-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin: 12px 0;
+        background: #f8fafc;
+        padding: 12px;
+        border-radius: 8px;
+    }
+    .answer-item { font-size: 13px; color: #475569; display: flex; align-items: center; gap: 6px; }
+</style>
+
+<!-- ХЛЕБНЫЕ КРОШКИ / НАВИГАЦИЯ -->
+<div style="margin-bottom: 20px;">
+    <a href="{% url 'index' %}" style="color: #64748b; text-decoration: none; font-size: 14px;">← Вернуться в каталог</a>
+</div>
+
+<!-- ЛЕВАЯ КОЛОНКА: ЖИВАЯ МЕДИА-КАРТОЧКА ТОВАРА -->
+<div class="detail-media">
+        {% if product.image %}
+            <!-- Если фото загружено админом — выводим его крупно и сочно -->
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px;">
+        {% else %}
+            <!-- Если фото нет — показываем стандартную коробку-заглушку -->
+            <div class="media-placeholder" style="text-align: center; color: #94a3b8;">
+                <span style="font-size: 64px;">📦</span>
+                <p style="margin: 10px 0 0 0; font-weight: 500;">Изображение товара</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <!-- ПРАВАЯ КОЛОНКА: КОММЕРЦИЯ -->
+    <div class="detail-info">
+        <div class="meta-row">
+            <span class="category-label">{{ product.category.name }}</span>
+            {% for tag in product.tags.all %}
+                <span class="tag-label"># {{ tag.name }}</span>
+            {% endfor %}
+        </div>
+        
+        <h1 class="product-title">{{ product.name }}</h1>
+        <div class="detail-date">Добавлен в каталог ZoneShop: {{ product.created_at|date:"j E Y" }} г.</div>
+        
+        <div class="price-card">
+            {% if product.details %}
+                <span class="price-value price-amount">{{ product.details.price }} руб.</span>
+                <p class="stock-status">🟢 В наличии на складе: {{ product.details.stock }} шт.</p>
+            {% else %}
+                <span style="color: #94a3b8; font-style: italic;">Цена не указана менеджером</span>
+            {% endif %}
+        </div>
+        
+        <div class="actions-row">
+            <a href="{% url 'add_to_cart' product.id %}" class="btn-main-buy">🛒 Добавить в корзину</a>
+            <a href="{% url 'toggle_wishlist' product.id %}" class="btn-main-wish">⭐ В избранное</a>
+        </div>
+    </div>
+</div>
+
+<!-- БЛОК АНКЕТНЫХ ОТЗЫВОВ И ОЦЕНОК ПОКУПАТЕЛЕЙ -->
+<div class="reviews-section">
+    <h2 style="margin-top: 0; color: #1e293b;">📊 Анкетирование и отзывы покупателей</h2>
+    
+    {% if product.reviews.all %}
+        {% for review in product.reviews.all %}
+            <div class="review-card">
+                <div class="review-meta">
+                    <span>Гость (IP: {{ review.ip_address }})</span>
+                    <span>{{ review.created_at|date:"j E Y в H:i" }}</span>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="font-weight: 600; color: #334155;">Результаты заполнения анкеты качества:</div>
+                    <!-- Вызываем наше свойство calculated_score, которое мы запрограммировали в моделях! -->
+                    <span class="score-badge">Рейтинг товара: {{ review.calculated_score }}%</span>
+                </div>
+                
+                <!-- Вывод ответов на вопросы анкеты -->
+                <div class="answers-grid">
+                    <div class="answer-item">📏 Размер подошел: {% if review.is_size_matched %}✅ Да{% else %}❌ Нет{% endif %}</div>
+                    <div class="answer-item">📦 Упаковка целая: {% if review.is_packaging_intact %}✅ Да{% else %}❌ Нет{% endif %}</div>
+                    <div class="answer-item">🚀 Доставка быстрая: {% if review.is_delivery_fast %}✅ Да{% else %}❌ Нет{% endif %}</div>
+                    <div class="answer-item">💎 Качество устроило: {% if review.is_quality_good %}✅ Да{% else %}❌ Нет{% endif %}</div>
+                </div>
+
+                {% if review.comment %}
+                    <p style="margin: 10px 0 0 0; color: #475569; font-style: italic; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                        <strong>Текстовый комментарий:</strong> «{{ review.comment }}»
+                    </p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p style="color: #64748b; font-style: italic; margin: 0;">На этот товар отзывов пока никто не оставлял. Будьте первыми!</p>
+    {% endif %}
+</div>
+{% endblock %}
