@@ -1,12 +1,106 @@
 {% extends 'base.html' %}
 {% block title %}Добавить товар — ZoneShop{% endblock %}
+
 {% block content %}
-    <h2>Добавление нового товара</h2>
+<style>
+    .add-product-widget {
+        background: white;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0;
+        max-width: 500px;
+        margin: 40px auto;
+    }
+    
+    h2 {
+        color: #1e293b;
+        font-size: 28px;
+        text-align: center;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+    }
+    
+    h2::before, h2::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+    }
+    
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .form-group {
+        position: relative;
+    }
+    
+    input {
+        width: 100%;
+        padding: 16px 14px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        font-size: 16px;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+        background: #fafafa;
+    }
+    
+    input:focus {
+        outline: none;
+        border-color: #27ae60;
+        box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+        background: white;
+    }
+    
+    input::placeholder {
+        color: #94a3b8;
+    }
+    
+    button[type="submit"] {
+        background: linear-gradient(135deg, #28a745, #218838);
+        color: white;
+        padding: 16px;
+        border: none;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+        margin-top: 10px;
+    }
+    
+    button[type="submit"]:hover {
+        transform: translateY(-2px);
+        opacity: 0.95;
+    }
+</style>
+
+<div class="add-product-widget">
+    <h2>➕ Добавление нового товара</h2>
+    
     <form method="POST">
-        {% csrf_token %} <!-- Обязательный тег безопасности Django вместо @csrf_exempt в будущем -->
-        <input type="text" name="title" placeholder="Название товара" required><br><br>
-        <input type="number" step="0.01" name="price" placeholder="Цена" required><br><br>
-        <input type="number" name="stock" placeholder="Остаток на складе" value="0"><br><br>
-        <button type="submit">Добавить товар</button>
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <input type="text" name="title" placeholder="Название товара" required autocomplete="off">
+        </div>
+        
+        <div class="form-group">
+            <input type="number" step="0.01" name="price" placeholder="Цена в рублях" required min="0" autocomplete="off">
+        </div>
+        
+        <div class="form-group">
+            <input type="number" name="stock" placeholder="Остаток на складе" value="0" min="0" autocomplete="off">
+        </div>
+        
+        <button type="submit">📦 Добавить товар в базу</button>
     </form>
+</div>
 {% endblock %}

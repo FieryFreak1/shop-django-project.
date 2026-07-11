@@ -3,13 +3,93 @@
 {% block title %}О нас — ZoneShop{% endblock %}
 
 {% block content %}
-    <h2>О магазине ZoneShop</h2>
-    <p>Дата основания: 2026 год.</p>
+<style>
+    .about-page {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0;
+        max-width: 800px;
+        margin: 40px auto;
+    }
     
-    <h3>Права потребителей:</h3>
-    <ul>
-        <li>Право на качество товара</li>
-        <li>Право на безопасность</li>
-        <li>Право на обмен в течение 14 дней</li>
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .header-icon {
+        font-size: 48px;
+        background: linear-gradient(135deg, #cb11ab, #0071e3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    h2 {
+        color: #1e293b;
+        font-size: 36px;
+        margin: 0;
+        line-height: 1.2;
+    }
+    
+    .founding-date {
+        display: inline-block;
+        background: #eff6ff;
+        color: #1e40af;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 14px;
+        border: 1px solid #bfdbfe;
+        margin-top: 10px;
+    }
+    
+    .rights-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .rights-list li {
+        background: #f8fafc;
+        border-left: 4px solid #28a745;
+        padding: 15px 20px;
+        margin-bottom: 10px;
+        border-radius: 0 8px 8px 0;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        font-size: 15px;
+        color: #334155;
+    }
+    
+    .rights-list li:hover {
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+</style>
+
+<div class="about-page">
+    <div class="page-header">
+        <span class="header-icon">🏪</span>
+        <div>
+            <h2>О магазине ZoneShop</h2>
+            <span class="founding-date">📅 Работаем с 2026 года</span>
+        </div>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 30px;">
+        Мы создаем пространство, где каждый покупатель чувствует себя уверенно. Наша миссия — предлагать только проверенные товары и обеспечивать сервис уровня мировых стандартов.
+    </p>
+    
+    <h3 style="color: #1e293b; margin-bottom: 20px;">Ваши права в ZoneShop:</h3>
+    <ul class="rights-list">
+        <li>✅ Право на качество товара (гарантия подлинности)</li>
+        <li>✅ Право на безопасность (проверенная продукция)</li>
+        <li>✅ Право на обмен в течение 14 дней без лишних вопросов</li>
     </ul>
+</div>
 {% endblock %}

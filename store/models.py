@@ -1,3 +1,4 @@
+# store/models
 from datetime import timedelta
 from django.utils import timezone
 
@@ -5,31 +6,59 @@ import secrets
 import string
 from django.core.validators import MinLengthValidator  
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, Permission, AbstractUser
+
+
+from django.conf import settings 
 
 
 
 # Профиль администратора для контроля спец-доступов
 class AdminProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='admin_profile')
-    can_change_prices = models.BooleanField(default=False, verbose_name="Разрешено менять цены")
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='admin_profile'
+    )
+
+    can_access_dashboard = models.BooleanField(
+        default=False,
+        verbose_name="Доступ к панели редактора"
+    )
+
+    can_change_prices = models.BooleanField(
+        default=False,
+        verbose_name="Разрешено менять цены"
+    )
+
+    can_delete_products = models.BooleanField(
+        default=False,
+        verbose_name="Разрешено удалять товары"
+    )
+
+    can_manage_orders = models.BooleanField(
+        default=False,
+        verbose_name="Разрешено управлять заказами"
+    )
 
     def __str__(self):
-        return f"Права админа для: {self.user.username}"
-
-
+        return f"Профиль админа для: {self.user.username}"
 
 class TagProposal(models.Model):
 
     name = models.CharField(max_length=50, verbose_name="Предложенный тег")
-
-
     product = models.ForeignKey('Product', on_delete=models.CASCADE, verbose_name="К какому товару привязать")
-    proposed_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Кто предложил")
+    proposed_by = models.ForeignKey(
+    settings.AUTH_USER_MODEL, 
+    on_delete=models.CASCADE, 
+    verbose_name="Кто предложил"
+)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Тег '{self.name}' для {self.product.name}"
+
+
 
 
 class Category(models.Model):
@@ -307,3 +336,18 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Фото для {self.product.name} (ID: {self.id})"
+
+
+class CustomUser(AbstractUser):
+    groups = models.ManyToManyField(
+        Group, 
+        verbose_name='groups', 
+        blank=True, 
+        related_name='%(app_label)s_%(class)s_user_set' # <-- Изменение здесь
+    )
+    user_permissions = models.ManyToManyField(
+        Permission, 
+        verbose_name='user permissions', 
+        blank=True, 
+        related_name='%(app_label)s_%(class)s_user_permissions' # <-- Изменение здесь
+    )

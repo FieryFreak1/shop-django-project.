@@ -1,0 +1,312 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Панель управления{% endblock %}</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #f1f5f9;
+            color: #1e293b;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        /* =========================
+        ВЕРХНЯЯ ПАНЕЛЬ
+        ========================= */
+        .admin-header {
+            height: 72px;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* Название больше НЕ является ссылкой */
+        .admin-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .admin-brand-icon {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: #2563eb;
+            font-size: 22px;
+        }
+
+        .admin-brand-text h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .admin-brand-text span {
+            display: block;
+            margin-top: 3px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* =========================
+           ПРАВАЯ ЧАСТЬ
+        ========================= */
+        .admin-user-area {
+            position: relative;
+        }
+
+        .admin-user-button {
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: white;
+            padding: 9px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .admin-user-button:hover {
+            background: #334155;
+        }
+
+        .admin-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .admin-user-info {
+            text-align: left;
+        }
+
+        .admin-user-info strong {
+            display: block;
+        }
+
+        .admin-user-info small {
+            color: #94a3b8;
+        }
+
+        /* =========================
+           ВЫПАДАЮЩЕЕ МЕНЮ
+        ========================= */
+        .admin-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 12px);
+            width: 240px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(15, 23, 42, 0.2);
+            border: 1px solid #e2e8f0;
+        }
+
+        .admin-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-header {
+            padding: 16px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .dropdown-header strong {
+            display: block;
+            color: #0f172a;
+        }
+
+        .dropdown-header span {
+            display: block;
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .dropdown-item {
+            display: block;
+            width: 100%;
+            padding: 13px 16px;
+            color: #334155;
+            text-decoration: none;
+            border: none;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background: #f1f5f9;
+        }
+
+        .dropdown-item.logout {
+            color: #dc2626;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* =========================
+           ОСНОВНОЙ КОНТЕНТ
+        ========================= */
+        .admin-main {
+            width: 100%;
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* =========================
+           МОБИЛЬНАЯ ВЕРСИЯ
+        ========================= */
+        @media (max-width: 700px) {
+            .admin-header {
+                padding: 0 15px;
+            }
+
+            .admin-brand-text span,
+            .admin-user-info {
+                display: none;
+            }
+
+            .admin-main {
+                padding: 15px;
+            }
+
+            .admin-dropdown {
+                width: 220px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<header class="admin-header">
+
+    <!-- НЕ ССЫЛКА: редактор не перейдет в магазин -->
+    <div class="admin-brand">
+        <div class="admin-brand-icon">⚙️</div>
+
+        <div class="admin-brand-text">
+            <h1>Панель управления</h1>
+
+            {% if request.user.is_superuser %}
+                <span>Главный администратор</span>
+            {% else %}
+                <span>Редактор магазина</span>
+            {% endif %}
+        </div>
+    </div>
+
+
+    <!-- МЕНЮ СПРАВА -->
+    <div class="admin-user-area">
+
+        <button
+            type="button"
+            class="admin-user-button"
+            id="adminUserButton"
+        >
+            <div class="admin-avatar">
+                {{ request.user.username|first|upper }}
+            </div>
+
+            <div class="admin-user-info">
+                <strong>{{ request.user.username }}</strong>
+
+                {% if request.user.is_superuser %}
+                    <small>Главный администратор</small>
+                {% else %}
+                    <small>Редактор</small>
+                {% endif %}
+            </div>
+
+            <span>▼</span>
+        </button>
+
+
+        <div class="admin-dropdown" id="adminDropdown">
+
+            <div class="dropdown-header">
+                <strong>{{ request.user.username }}</strong>
+
+                {% if request.user.email %}
+                    <span>{{ request.user.email }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Здесь позже можно добавить настройки профиля -->
+
+            <form method="post" action="{% url 'dashboard_logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item logout">
+                    🚪 Выйти
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+
+</header>
+
+
+<main class="admin-main">
+    {% block content %}
+    {% endblock %}
+</main>
+
+
+{% block extra_js %}{% endblock %}
+
+<script>
+    const adminUserButton = document.getElementById("adminUserButton");
+    const adminDropdown = document.getElementById("adminDropdown");
+
+    adminUserButton.addEventListener("click", function(event) {
+        event.stopPropagation();
+        adminDropdown.classList.toggle("show");
+    });
+
+    document.addEventListener("click", function(event) {
+        if (!adminDropdown.contains(event.target)) {
+            adminDropdown.classList.remove("show");
+        }
+    });
+</script>
+
+</body>
+</html>
+```

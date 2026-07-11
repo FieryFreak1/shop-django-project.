@@ -4,7 +4,6 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-# ⚡ ИСПРАВЛЕНИЕ: Импортируем правильный коннекшн от самого Django для ускорения SQLite
 from django.db import connection
 
 urlpatterns = [

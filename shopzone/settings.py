@@ -6,13 +6,14 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+AUTH_USER_MODEL = 'store.CustomUser'
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0&ny)wbk0_rf8u5@v16uu$c_i5+dt6h@m7wao-xsb)(g)11m4o'
+SECRET_KEY = 'dsnvfjsdnacoksanoidcnas'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -20,7 +21,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Указываем Django, куда отправлять пользователей для входа в систему
-LOGIN_URL = '/secret-backend-zone-2026/'
+LOGIN_URL = 'dashboard_login'
 
 
 # Application definition
@@ -51,8 +52,8 @@ ROOT_URLCONF = 'shopzone.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], # Ищет base.html в корне
-        'APP_DIRS': True,                 # Ищет store.html внутри приложения
+        'DIRS': [BASE_DIR / 'templates'], 
+        'APP_DIRS': True,                 
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
@@ -126,7 +127,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 
 
-# Убедись, что BASE_DIR определен в начале твоего settings.py
+
 # Создаем папку для логов в корне проекта, если её нет
 LOGS_DIR = os.path.join(BASE_DIR, 'logs')
 if not os.path.exists(LOGS_DIR):
@@ -169,13 +170,6 @@ LOGGING = {
 }
 
 
-
-# 🔐 НАСТРОЙКИ КИБЕРБЕЗОПАСНОСТИ СЕССИЙ АДМИНИСТРАТОРОВ
-# Время жизни сессии в секундах (2 часа = 120 минут = 7200 секунд)
-SESSION_COOKIE_AGE = 7200
-
-# Сессия закрывается автоматически, как только админ закроет вкладку браузера
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-# Django будет автоматически обновлять куки при каждом действии, отсчитывая 2 часа заново
-SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True 
+SESSION_SAVE_EVERY_REQUEST = True 
+SESSION_COOKIE_AGE = 7200 

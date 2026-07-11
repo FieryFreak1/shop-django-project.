@@ -1,3 +1,4 @@
+# store/context_processors.py
 from .models import StoreContact, Cart, WishList, RecentlyViewed 
 from .utils import get_client_ip
 

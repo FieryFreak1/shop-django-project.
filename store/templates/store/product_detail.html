@@ -1,203 +1,297 @@
 {% extends 'base.html' %}
-
 {% block title %}{{ product.name }} — ZoneShop{% endblock %}
 
 {% block content %}
 <style>
-    /* Современные стили для карточки товара */
-    .detail-container {
+    /* Хлебные крошки */
+    .breadcrumbs {
+        margin-bottom: 20px;
+    }
+    .breadcrumbs a {
+        color: #64748b;
+        text-decoration: none;
+        font-size: 14px;
         display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    /* Основной контейнер (две колонки) */
+    .detail-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 40px;
         background: white;
         padding: 40px;
         border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        box-shadow: 0 8px 30px rgba(0,0,0,.05);
         border: 1px solid #e2e8f0;
         margin-bottom: 40px;
-        flex-wrap: wrap;
     }
+    
+    /* Медиа-блок слева */
     .detail-media {
-        flex: 1;
-        min-width: 300px;
-        background: #f8fafc;
+        position: relative;
+        overflow: hidden;
         border-radius: 12px;
+        min-height: 400px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+    
+    .detail-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform .5s ease;
+    }
+    
+    .detail-media:hover img {
+        transform: scale(1.05);
+    }
+    
+    .media-placeholder {
+        position: absolute;
+        inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 350px;
-        border: 1px dashed #cbd5e1;
-    }
-    .media-placeholder {
-        text-align: center;
+        flex-direction: column;
         color: #94a3b8;
+        font-size: 24px;
     }
+    
+    /* Правая колонка информации */
     .detail-info {
-        flex: 1;
-        min-width: 300px;
         display: flex;
         flex-direction: column;
     }
+    
     .meta-row {
         display: flex;
-        gap: 10px;
-        align-items: center;
-        margin-bottom: 15px;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
     }
+    
     .category-label {
         background: #eff6ff;
         color: #1e40af;
         padding: 4px 12px;
-        border-radius: 20px;
+        border-radius: 999px;
         font-size: 13px;
         font-weight: 600;
     }
+    
     .tag-label {
         background: #f1f5f9;
         color: #475569;
         padding: 4px 10px;
-        border-radius: 20px;
+        border-radius: 999px;
         font-size: 12px;
     }
-    .product-title {
-        font-size: 32px;
+    
+    h1.product-title {
+        font-size: 36px;
         color: #0f172a;
         margin: 0 0 10px 0;
-        font-weight: 700;
+        line-height: 1.2;
     }
+    
     .detail-date {
         font-size: 13px;
         color: #94a3b8;
-        margin-bottom: 25px;
+        margin-bottom: 30px;
     }
+    
+    /* Карточка цены */
     .price-card {
-        background: #f8fafc;
-        padding: 20px;
+        background: #fff;
+        padding: 25px;
         border-radius: 12px;
         border: 1px solid #e2e8f0;
         margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.02);
     }
+    
     .price-amount {
-        font-size: 28px;
+        font-size: 32px;
         color: #0f172a;
         font-weight: 800;
         display: block;
     }
+    
     .stock-status {
-        font-size: 13px;
-        color: #2563eb;
-        margin: 6px 0 0 0;
+        font-size: 14px;
+        color: #16a34a;
+        margin-top: 8px;
         font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
+    
+    .stock-status.out-of-stock {
+        color: #dc2626;
+    }
+    
+    /* Кнопки действий */
     .actions-row {
         display: flex;
         gap: 15px;
-        margin-bottom: 30px;
+        margin-bottom: 40px;
     }
+    
     .btn-main-buy {
         flex: 2;
-        padding: 14px 20px;
-        background: #28a745;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, #28a745, #218838);
         color: white;
         text-decoration: none;
         text-align: center;
         border-radius: 10px;
         font-weight: 700;
         font-size: 16px;
-        box-shadow: 0 4px 12px rgba(40,167,69,0.2);
-        transition: background 0.2s;
+        border: none;
+        cursor: pointer;
+        transition: all .2s ease;
+        box-shadow: 0 4px 12px rgba(40,167,69,.2);
     }
-    .btn-main-buy:hover { background: #218838; }
+    
+    .btn-main-buy:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(40,167,69,.3);
+    }
     
     .btn-main-wish {
         flex: 1;
-        padding: 14px 20px;
+        padding: 16px 24px;
         background: #fff;
         color: #334155;
         text-decoration: none;
         text-align: center;
         border-radius: 10px;
         font-weight: 600;
-        font-size: 15px;
+        font-size: 16px;
         border: 1px solid #cbd5e1;
-        transition: background 0.2s;
+        transition: all .2s ease;
     }
-    .btn-main-wish:hover { background: #f8fafc; }
-
-    /* Блок отзывов-анкет */
+    
+    .btn-main-wish:hover {
+        background: #f8fafc;
+        border-color: #94a3b8;
+    }
+    
+    /* Блок отзывов */
     .reviews-section {
         background: white;
         padding: 40px;
         border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 20px rgba(0,0,0,.04);
         border: 1px solid #e2e8f0;
     }
+    
     .review-card {
         border-bottom: 1px solid #e2e8f0;
-        padding: 20px 0;
+        padding: 25px 0;
     }
-    .review-card:last-child { border-bottom: none; }
+    
+    .review-card:last-child { 
+        border-bottom: none; 
+    }
+    
     .review-meta {
         display: flex;
         justify-content: space-between;
         color: #64748b;
         font-size: 13px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
+    
     .score-badge {
         background: #f0fdf4;
         color: #166534;
-        padding: 4px 10px;
+        padding: 6px 12px;
         border-radius: 6px;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 14px;
+        border: 1px solid #bbf7d0;
     }
+    
     .answers-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 10px;
+        gap: 12px;
         margin: 12px 0;
         background: #f8fafc;
         padding: 12px;
         border-radius: 8px;
+        border: 1px solid #e2e8f0;
     }
-    .answer-item { font-size: 13px; color: #475569; display: flex; align-items: center; gap: 6px; }
+    
+    .answer-item {
+        font-size: 14px;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .comment-box {
+        margin-top: 15px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        font-style: italic;
+        color: #475569;
+    }
+    
+    .empty-reviews {
+        text-align: center;
+        padding: 40px;
+        color: #64748b;
+    }
 </style>
 
-<!-- ХЛЕБНЫЕ КРОШКИ / НАВИГАЦИЯ -->
-<div style="margin-bottom: 20px;">
-    <a href="{% url 'index' %}" style="color: #64748b; text-decoration: none; font-size: 14px;">← Вернуться в каталог</a>
+<!-- НАВИГАЦИЯ -->
+<div class="breadcrumbs">
+    <a href="{% url 'index' %}">← На главную страницу каталога</a>
 </div>
 
-<!-- ЛЕВАЯ КОЛОНКА: ЖИВАЯ МЕДИА-КАРТОЧКА ТОВАРА -->
-<div class="detail-media">
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<div class="detail-container">
+    <!-- ЛЕВАЯ КОЛОНКА: ФОТО -->
+    <div class="detail-media">
         {% if product.image %}
-            <!-- Если фото загружено админом — выводим его крупно и сочно -->
-            <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px;">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}">
         {% else %}
-            <!-- Если фото нет — показываем стандартную коробку-заглушку -->
-            <div class="media-placeholder" style="text-align: center; color: #94a3b8;">
-                <span style="font-size: 64px;">📦</span>
-                <p style="margin: 10px 0 0 0; font-weight: 500;">Изображение товара</p>
+            <div class="media-placeholder">
+                📦
+                <p style="margin-top: 10px;">Изображение скоро появится</p>
             </div>
         {% endif %}
     </div>
     
-    <!-- ПРАВАЯ КОЛОНКА: КОММЕРЦИЯ -->
+    <!-- ПРАВАЯ КОЛОНКА: ИНФО И ЦЕНА -->
     <div class="detail-info">
         <div class="meta-row">
             <span class="category-label">{{ product.category.name }}</span>
             {% for tag in product.tags.all %}
-                <span class="tag-label"># {{ tag.name }}</span>
+                <span class="tag-label">#{{ tag.name }}</span>
             {% endfor %}
         </div>
         
         <h1 class="product-title">{{ product.name }}</h1>
-        <div class="detail-date">Добавлен в каталог ZoneShop: {{ product.created_at|date:"j E Y" }} г.</div>
+        <div class="detail-date">Добавлен в каталог {{ product.created_at|date:"j E Y" }}</div>
         
         <div class="price-card">
             {% if product.details %}
-                <span class="price-value price-amount">{{ product.details.price }} руб.</span>
-                <p class="stock-status">🟢 В наличии на складе: {{ product.details.stock }} шт.</p>
+                <span class="price-amount">{{ product.details.price|floatformat:2 }} ₽</span>
+                {% if product.details.stock > 0 %}
+                    <span class="stock-status">🟢 В наличии: {{ product.details.stock }} шт.</span>
+                {% else %}
+                    <span class="stock-status out-of-stock">🔴 Нет в наличии</span>
+                {% endif %}
             {% else %}
                 <span style="color: #94a3b8; font-style: italic;">Цена не указана менеджером</span>
             {% endif %}
@@ -210,7 +304,7 @@
     </div>
 </div>
 
-<!-- БЛОК АНКЕТНЫХ ОТЗЫВОВ И ОЦЕНОК ПОКУПАТЕЛЕЙ -->
+<!-- БЛОК ОТЗЫВОВ -->
 <div class="reviews-section">
     <h2 style="margin-top: 0; color: #1e293b;">📊 Анкетирование и отзывы покупателей</h2>
     
@@ -223,12 +317,10 @@
                 </div>
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <div style="font-weight: 600; color: #334155;">Результаты заполнения анкеты качества:</div>
-                    <!-- Вызываем наше свойство calculated_score, которое мы запрограммировали в моделях! -->
-                    <span class="score-badge">Рейтинг товара: {{ review.calculated_score }}%</span>
+                    <div style="font-weight: 600; color: #334155;">Результаты анкеты качества:</div>
+                    <span class="score-badge">Рейтинг: {{ review.calculated_score }}%</span>
                 </div>
                 
-                <!-- Вывод ответов на вопросы анкеты -->
                 <div class="answers-grid">
                     <div class="answer-item">📏 Размер подошел: {% if review.is_size_matched %}✅ Да{% else %}❌ Нет{% endif %}</div>
                     <div class="answer-item">📦 Упаковка целая: {% if review.is_packaging_intact %}✅ Да{% else %}❌ Нет{% endif %}</div>
@@ -237,14 +329,17 @@
                 </div>
 
                 {% if review.comment %}
-                    <p style="margin: 10px 0 0 0; color: #475569; font-style: italic; background: #fff; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
-                        <strong>Текстовый комментарий:</strong> «{{ review.comment }}»
-                    </p>
+                    <div class="comment-box">
+                        «{{ review.comment }}»
+                    </div>
                 {% endif %}
             </div>
         {% endfor %}
     {% else %}
-        <p style="color: #64748b; font-style: italic; margin: 0;">На этот товар отзывов пока никто не оставлял. Будьте первыми!</p>
+        <div class="empty-reviews">
+            <p style="font-size: 18px;">На этот товар пока нет отзывов.</p>
+            <p style="font-size: 14px;">Будьте первым, кто поделится мнением!</p>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
