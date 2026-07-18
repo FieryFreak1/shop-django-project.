@@ -1,7 +1,25 @@
 # store/context_processors.py
 from .models import StoreContact, Cart, WishList, RecentlyViewed 
 from .utils import get_client_ip
+from .models import PartnerProfile
 
+
+def user_roles(request):
+    is_partner = False
+    partner_profile = None
+
+    if request.user.is_authenticated:
+        try:
+            partner_profile = request.user.partner_profile
+            is_partner = partner_profile.is_active
+        except PartnerProfile.DoesNotExist:
+            pass
+
+    return {
+        "is_partner": is_partner,
+        "partner_profile": partner_profile,
+        "is_main_admin": request.user.is_authenticated and request.user.is_superuser,
+    }
 
 
 def global_store_data(request):

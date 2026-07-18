@@ -15,7 +15,32 @@ logger = logging.getLogger(__name__)
 def add_to_cart(request, product_id):
     user_ip = get_client_ip(request)
     product_item = get_object_or_404(Product, id=product_id)
-    
+
+    listing = product_item.listing
+
+    if (
+        not listing.is_active
+        or listing.moderation_status != "approved"
+    ):
+        return HttpResponse(
+            "Этот товар ещё не прошёл модерацию.",
+            status=400
+        )
+
+    # Проверяем наличие деталей
+    if not hasattr(product_item, "details"):
+        return HttpResponse(
+            "Для товара не указаны данные о наличии.",
+            status=400
+        )
+
+    if product_item.details.stock <= 0:
+        return HttpResponse(
+            "Товара нет в наличии.",
+            status=400
+        )
+
+# дальше идет обычное добавление в корзину    
     try:
         with transaction.atomic():
             cart, created = Cart.objects.get_or_create(ip_address=user_ip)
@@ -72,6 +97,15 @@ def checkout(request):
             items_to_create = []
             
             for item in checked_items:
+                '''проверка наличия товара '''
+                if (
+                    not item.product.listing.is_active
+                    or item.product.listing.moderation_status != "approved"
+                ):
+                    return HttpResponse(
+                        f"Товар '{item.product.name}' ещё не прошёл модерацию.",
+                        status=400
+                    )
                 product_details = item.product.details
                 
                 if product_details.stock < item.quantity:
@@ -85,6 +119,7 @@ def checkout(request):
                 total_sum += product_details.price * item.quantity
                 
                 items_to_create.append(OrderItem(
+                    product=item.product,
                     product_name=item.product.name,
                     price=product_details.price,
                     quantity=item.quantity
@@ -147,7 +182,12 @@ def remove_from_cart(request, product_id):
 # Добавление / Удаление товара из Отмеченного (Избранного на 24 часа)
 def toggle_wishlist(request, product_id):
     user_ip = get_client_ip(request)
-    product_item = get_object_or_404(Product, id=product_id)
+    product_item = get_object_or_404(
+        Product.objects.select_related("listing"),
+        id=product_id,
+        listing__is_active=True,
+        listing__moderation_status="approved",
+    )
     
     wishlist, created = WishList.objects.get_or_create(ip_address=user_ip)
     wishlist_item = WishlistItem.objects.filter(wishlist=wishlist, product=product_item).first()

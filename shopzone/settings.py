@@ -52,8 +52,8 @@ ROOT_URLCONF = 'shopzone.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'], 
-        'APP_DIRS': True,                 
+        'DIRS': [BASE_DIR / 'templates'],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
@@ -61,6 +61,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 
                 'store.context_processors.global_store_data',
+                'store.context_processors.user_roles',
             ],
         },
     },

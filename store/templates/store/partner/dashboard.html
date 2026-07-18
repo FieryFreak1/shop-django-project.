@@ -1,77 +1,47 @@
 {% extends 'admin_base.html' %}
 
-{% block title %}Добавить товар{% endblock %}
+{% block title %}Кабинет партнёра{% endblock %}
 
 {% block content %}
-
 <style>
-.container{
-    max-width:900px;
-    margin:30px auto;
-}
+    .partner-header {
+        margin-bottom: 30px;
+    }
 
-.card{
-    background:#fff;
-    padding:30px;
-    border-radius:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
+    .partner-header h1 {
+        margin-bottom: 8px;
+    }
 
-h1{
-    margin-bottom:25px;
-}
+    .partner-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-top: 25px;
+    }
 
-.form-group{
-    margin-bottom:20px;
-}
+    .partner-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+        text-decoration: none;
+        color: #0f172a;
+        transition: 0.2s;
+    }
 
-label{
-    display:block;
-    margin-bottom:8px;
-    font-weight:600;
-}
+    .partner-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.14);
+    }
 
-input,
-select,
-textarea{
-    width:100%;
-    padding:12px;
-    border:1px solid #d1d5db;
-    border-radius:8px;
-    font-size:15px;
-    box-sizing:border-box;
-}
+    .partner-card h3 {
+        margin: 0 0 10px;
+    }
 
-select[multiple]{
-    height:180px;
-}
-
-.error{
-    background:#fee2e2;
-    color:#991b1b;
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:20px;
-}
-
-.btn{
-    background:#16a34a;
-    color:white;
-    border:none;
-    padding:14px 24px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:600;
-}
-
-.btn:hover{
-    background:#15803d;
-}
-
-small{
-    color:#64748b;
-}
+    .partner-card p {
+        color: #64748b;
+        margin: 0;
+    }
 
 /* ===== ZoneShop 2026 Aurora UI Upgrade ===== */
 :root{
@@ -154,143 +124,35 @@ h1,h2,h3{letter-spacing:-.03em}
 
 </style>
 
-<div class="container">
+<div class="partner-header">
+    <h1>Кабинет партнёра</h1>
 
-<div class="card">
+    <p>
+        Добро пожаловать,
+        <strong>{{ request.user.username }}</strong>
+    </p>
 
-<h1>➕ Добавление товара</h1>
-
-{% if error %}
-<div class="error">
-    {{ error }}
-</div>
-{% endif %}
-
-<form method="POST" enctype="multipart/form-data">
-
-{% csrf_token %}
-
-<div class="form-group">
-<label>Название товара</label>
-
-<input
-type="text"
-name="title"
-maxlength="40"
-required>
+    {% if partner.company_name %}
+        <p>Компания: {{ partner.company_name }}</p>
+    {% endif %}
 </div>
 
+<div class="partner-grid">
 
-<div class="form-group">
-<label>Категория</label>
+    <a href="{% url 'partner_products' %}" class="partner-card">
+        <h3>📦 Мои товары</h3>
+        <p>Просмотр и управление вашими товарами.</p>
+    </a>
 
-<select name="category" required>
+    <a href="{% url 'partner_orders' %}" class="partner-card">
+        <h3>🛒 Заказы</h3>
+        <p>Просмотр заказов по вашим товарам.</p>
+    </a>
 
-<option value="">
-Выберите категорию
-</option>
-
-{% for category in categories %}
-<option value="{{ category.id }}">
-{{ category.name }}
-</option>
-{% endfor %}
-
-</select>
-
-</div>
-
-
-<div class="form-group">
-
-<label>Цена</label>
-
-<input
-type="number"
-name="price"
-step="0.01"
-min="0"
-required>
+    <a href="{% url 'partner_analytics' %}" class="partner-card">
+        <h3>📊 Аналитика</h3>
+        <p>Продажи, остатки и статистика.</p>
+    </a>
 
 </div>
-
-
-<div class="form-group">
-
-<label>Количество</label>
-
-<input
-type="number"
-name="stock"
-min="0"
-value="0"
-required>
-
-</div>
-
-
-<div class="form-group">
-
-<label>Главное изображение</label>
-
-<input
-type="file"
-name="product_image"
-accept="image/*">
-
-</div>
-
-
-<div class="form-group">
-
-<label>Дополнительные фотографии</label>
-
-<input
-type="file"
-name="gallery_images"
-accept="image/*"
-multiple>
-
-<small>
-Можно выбрать до 10 изображений.
-</small>
-
-</div>
-
-
-<div class="form-group">
-
-<label>Теги</label>
-
-<select
-name="selected_tags"
-multiple>
-
-{% for tag in tags %}
-<option value="{{ tag.id }}">
-{{ tag.name }}
-</option>
-{% endfor %}
-
-</select>
-
-<small>
-Удерживайте Ctrl для выбора нескольких тегов.
-</small>
-
-</div>
-
-
-<button class="btn" type="submit">
-
-📦 Отправить на модерацию
-
-</button>
-
-</form>
-
-</div>
-
-</div>
-
 {% endblock %}

@@ -1,77 +1,33 @@
 {% extends 'admin_base.html' %}
 
-{% block title %}Добавить товар{% endblock %}
+{% block title %}Аналитика партнёра{% endblock %}
 
 {% block content %}
-
 <style>
-.container{
-    max-width:900px;
-    margin:30px auto;
-}
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+        margin-top: 25px;
+    }
 
-.card{
-    background:#fff;
-    padding:30px;
-    border-radius:16px;
-    box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
+    .stat-card {
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+    }
 
-h1{
-    margin-bottom:25px;
-}
+    .stat-card h3 {
+        margin-top: 0;
+        color: #64748b;
+    }
 
-.form-group{
-    margin-bottom:20px;
-}
-
-label{
-    display:block;
-    margin-bottom:8px;
-    font-weight:600;
-}
-
-input,
-select,
-textarea{
-    width:100%;
-    padding:12px;
-    border:1px solid #d1d5db;
-    border-radius:8px;
-    font-size:15px;
-    box-sizing:border-box;
-}
-
-select[multiple]{
-    height:180px;
-}
-
-.error{
-    background:#fee2e2;
-    color:#991b1b;
-    padding:12px;
-    border-radius:8px;
-    margin-bottom:20px;
-}
-
-.btn{
-    background:#16a34a;
-    color:white;
-    border:none;
-    padding:14px 24px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:600;
-}
-
-.btn:hover{
-    background:#15803d;
-}
-
-small{
-    color:#64748b;
-}
+    .stat-number {
+        font-size: 32px;
+        font-weight: bold;
+        color: #0f172a;
+    }
 
 /* ===== ZoneShop 2026 Aurora UI Upgrade ===== */
 :root{
@@ -154,143 +110,43 @@ h1,h2,h3{letter-spacing:-.03em}
 
 </style>
 
-<div class="container">
+<h1>Аналитика</h1>
+<p>Статистика товаров партнёра {{ request.user.username }}</p>
 
-<div class="card">
+<div class="analytics-grid">
 
-<h1>➕ Добавление товара</h1>
+    <div class="stat-card">
+        <h3>📦 Товаров</h3>
+        <div class="stat-number">{{ total_products }}</div>
+    </div>
 
-{% if error %}
-<div class="error">
-    {{ error }}
+    <div class="stat-card">
+        <h3>🛒 Продано единиц</h3>
+        <div class="stat-number">{{ total_sales }}</div>
+    </div>
+
+    <div class="stat-card">
+        <h3>📋 Заказов</h3>
+        <div class="stat-number">{{ total_orders }}</div>
+    </div>
+
+    <div class="stat-card">
+        <h3>💰 Выручка</h3>
+        <div class="stat-number">{{ total_revenue }} ₽</div>
+    </div>
+
 </div>
-{% endif %}
 
-<form method="POST" enctype="multipart/form-data">
+<h2>Топ товаров</h2>
 
-{% csrf_token %}
-
-<div class="form-group">
-<label>Название товара</label>
-
-<input
-type="text"
-name="title"
-maxlength="40"
-required>
-</div>
-
-
-<div class="form-group">
-<label>Категория</label>
-
-<select name="category" required>
-
-<option value="">
-Выберите категорию
-</option>
-
-{% for category in categories %}
-<option value="{{ category.id }}">
-{{ category.name }}
-</option>
+{% for item in top_products %}
+    <div class="stat-card">
+        <strong>{{ item.product__name }}</strong>
+        <p>Продано: {{ item.sold }}</p>
+        <p>Выручка: {{ item.revenue }} ₽</p>
+    </div>
+{% empty %}
+    <p>Продаж пока нет.</p>
 {% endfor %}
-
-</select>
-
-</div>
-
-
-<div class="form-group">
-
-<label>Цена</label>
-
-<input
-type="number"
-name="price"
-step="0.01"
-min="0"
-required>
-
-</div>
-
-
-<div class="form-group">
-
-<label>Количество</label>
-
-<input
-type="number"
-name="stock"
-min="0"
-value="0"
-required>
-
-</div>
-
-
-<div class="form-group">
-
-<label>Главное изображение</label>
-
-<input
-type="file"
-name="product_image"
-accept="image/*">
-
-</div>
-
-
-<div class="form-group">
-
-<label>Дополнительные фотографии</label>
-
-<input
-type="file"
-name="gallery_images"
-accept="image/*"
-multiple>
-
-<small>
-Можно выбрать до 10 изображений.
-</small>
-
-</div>
-
-
-<div class="form-group">
-
-<label>Теги</label>
-
-<select
-name="selected_tags"
-multiple>
-
-{% for tag in tags %}
-<option value="{{ tag.id }}">
-{{ tag.name }}
-</option>
-{% endfor %}
-
-</select>
-
-<small>
-Удерживайте Ctrl для выбора нескольких тегов.
-</small>
-
-</div>
-
-
-<button class="btn" type="submit">
-
-📦 Отправить на модерацию
-
-</button>
-
-</form>
-
-</div>
-
-</div>
 
 {% endblock %}

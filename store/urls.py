@@ -1,15 +1,16 @@
 from django.urls import path
+from store import partner_views
 
 from . import views
 from . import cart_views
 from . import admin_views
-
+from . import seller_dashboard
+from . import seller_views
 
 urlpatterns = [
     # =========================================================
     # ГЛАВНЫЕ СТРАНИЦЫ МАГАЗИНА
     # =========================================================
-
     path('', views.index, name='index'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
@@ -19,13 +20,10 @@ urlpatterns = [
         views.product_detail,
         name='product_detail'
     ),
-
-
-    # =========================================================
+    #========================================================
     # КОРЗИНА, ИЗБРАННОЕ И ИСТОРИЯ
     # cart_views.py
-    # =========================================================
-
+    #========================================================
     path(
         'cart/',
         cart_views.cart_detail,
@@ -134,6 +132,16 @@ urlpatterns = [
         name='admin_update_price'
     ),
 
+    path(
+        "secret-backend-zone-2026/product/<int:product_id>/toggle-active/",
+        admin_views.toggle_product_active,
+        name="toggle_product_active",
+    ),
+    path(
+        'secret-backend-zone-2026/product/stock/<int:product_id>/',
+        admin_views.admin_update_stock,
+        name='admin_update_stock'
+    ),
 
     # =========================================================
     # УПРАВЛЕНИЕ ЗАКАЗАМИ
@@ -176,6 +184,36 @@ urlpatterns = [
         name='admin_create_category'
     ),
 
+    # маршруты для партнеров 
+    path(
+        "partner/dashboard/",
+        partner_views.partner_dashboard,
+        name="partner_dashboard"
+    ),
+
+    path(
+        "partner/products/",
+        partner_views.partner_products,
+        name="partner_products"
+    ),
+
+    path(
+        "partner/orders/",
+        partner_views.partner_orders,
+        name="partner_orders"
+    ),
+
+    path(
+        "partner/analytics/",
+        partner_views.partner_analytics,
+        name="partner_analytics"
+    ),
+    
+    path(
+        "partner/products/add/",
+        partner_views.partner_add_product,
+        name="partner_add_product",
+    ),
 
     # =========================================================
     # УПРАВЛЕНИЕ ПРАВАМИ РЕДАКТОРОВ
@@ -187,6 +225,71 @@ urlpatterns = [
         admin_views.admin_toggle_permission,
         name='admin_toggle_permission'
     ),
+    
+    path(
+        "product/<int:product_id>/approve/",
+        admin_views.approve_product,
+        name="approve_product",
+    ),
+
+    path(
+        "product/<int:product_id>/reject/",
+        admin_views.reject_product,
+        name="reject_product",
+    ),
+    
+    # повторная отправка на одобрения 
+    path(
+        "partner/product/<int:product_id>/edit/",
+        partner_views.partner_edit_product,
+        name="partner_edit_product",
+    ),
+    
+    
+    
+    path(
+        "seller/register/",
+        views.become_seller,
+        name="become_seller",
+    ),
+
+    path(
+        "seller/dashboard/",
+        seller_dashboard.seller_dashboard,
+        name="seller_dashboard",
+    ),
+    
+    # urls.py
+
+    path(
+        "seller/product/add/",
+        seller_views.seller_add_product,
+        name="seller_add_product"
+    ),
+    path(
+        "seller/products/",
+        seller_views.seller_products,
+        name="seller_products",
+        ),
+    
+    path(
+        "seller/product/<int:product_id>/edit/",
+        seller_views.seller_edit_product,
+        name="seller_edit_product",
+    ),
+    
+    path(
+        "partner/register/",
+        partner_views.partner_register,
+        name="partner_register",
+    ),
+
+    path(
+        "partner/waiting/",
+        partner_views.partner_waiting,
+        name="partner_waiting",
+    ),
+    
 ]
 
 

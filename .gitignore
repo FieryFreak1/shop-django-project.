@@ -1,5 +1,6 @@
 # Виртуальное окружение
 venv/
+
 .venv/
 
 # База данных и её служебные файлы WAL
@@ -10,15 +11,27 @@ db.sqlite3-shm
 # Логи
 logs/
 
-# КЭШ PYTHON (Убирает папки __pycache__ и файлы .pyc навсегда)
+# КЭШ PYTHON
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
 shopzone/__pycache__/
 store/__pycache__/
 store/migrations/__pycache__/
 
-# НАШ СЕКРЕТНЫЙ ФАЙЛ (Указываем оба возможных варианта)
+# Django migrations
+migrations/
+*/migrations/
+
+# Django файлы моделей и админки (если нужно полностью игнорировать)
+admin.py
+models.py
+
+# Media файлы (загрузки пользователей)
+media/
+
+# НАШ СЕКРЕТНЫЙ ФАЙЛ
 text_recoment
 text_recoment.txt

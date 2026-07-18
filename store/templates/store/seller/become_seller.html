@@ -1,0 +1,28 @@
+<h2>Стать частным продавцом</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <input
+        type="text"
+        name="phone"
+        placeholder="Телефон"
+        required
+    >
+
+    <br><br>
+
+    <input
+        type="text"
+        name="city"
+        placeholder="Город"
+        required
+    >
+
+    <br><br>
+
+    <button type="submit">
+        Создать аккаунт продавца
+    </button>
+
+</form>

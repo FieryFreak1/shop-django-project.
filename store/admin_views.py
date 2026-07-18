@@ -13,6 +13,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.dateparse import parse_date
 from django.views.decorators.csrf import csrf_exempt
 
+from .permissions import dashboard_permission, partner_update_stock
+
 from .forms import StoreContactForm
 from .models import (
     AdminProfile,
@@ -25,24 +27,50 @@ from .models import (
     StoreContact,
     Tag,
     TagProposal,
+    ProductListing,
 )
 
+from .permissions import partner_update_stock
 
 logger = logging.getLogger(__name__)
 
 
-
-
 @login_required
 def admin_dashboard(request):
-    """Главный пульт управления для всех админов"""
+    """Главный пульт управления для администраторов"""
+
+    # ===================================================
+    # Если это партнёр — отправляем в кабинет партнёра
+    # ===================================================
+    partner = getattr(request.user, "partner_profile", None)
+
+    pending_products = (
+        Product.objects.filter(
+            listing__moderation_status="pending"
+        )
+        .select_related(
+            "listing",
+            "category",
+            "details",
+        )
+    )
+    if partner and partner.is_active:
+        return redirect("partner_dashboard")
+
+    # ===================================================
+    # Ниже обычная админка
+    # ===================================================
+
     is_main_admin = request.user.is_superuser
 
     profile = AdminProfile.objects.filter(
         user=request.user
     ).first()
-    can_edit_price = is_main_admin or (profile and profile.can_change_prices)
 
+    can_edit_price = (
+        is_main_admin or
+        (profile and profile.can_change_prices)
+    )
 
     contact_instance = StoreContact.objects.last()
 
@@ -90,62 +118,105 @@ def admin_dashboard(request):
             return redirect("admin_dashboard")
 
     else:
-        contacts_form = StoreContactForm(instance=contact_instance)
+        contacts_form = StoreContactForm(
+            instance=contact_instance
+        )
 
-    # 📦 2. ПОИСК ЗАКАЗОВ
-    orders_queryset = Order.objects.prefetch_related('items').all()
-    search_product = request.GET.get('search_product', '')
-    search_date = request.GET.get('search_date', '')
+    # ============================================
+    # Поиск заказов
+    # ============================================
+    orders_queryset = Order.objects.prefetch_related(
+        "items"
+    ).all()
+
+    search_product = request.GET.get(
+        "search_product",
+        ""
+    )
+
+    search_date = request.GET.get(
+        "search_date",
+        ""
+    )
 
     if search_product:
-        orders_queryset = orders_queryset.filter(items__product_name__icontains=search_product)
-        
+        orders_queryset = orders_queryset.filter(
+            items__product_name__icontains=search_product
+        )
+
     if search_date:
         parsed_date = parse_date(search_date)
-        if parsed_date:
-            orders_queryset = orders_queryset.filter(created_at__date=parsed_date)
 
-    # 🏷️ 3. СБОР ДАННЫХ КАТАЛОГА
-    products = Product.objects.select_related('details').all()
+        if parsed_date:
+            orders_queryset = orders_queryset.filter(
+                created_at__date=parsed_date
+            )
+
+    # ============================================
+    # Каталог
+    # ============================================
+    products = Product.objects.select_related(
+        "details",
+        "listing",
+        "category",
+    ).all()
+
     categories = Category.objects.all()
+
     tags = Tag.objects.all()
-    proposals = TagProposal.objects.select_related('product', 'proposed_by').all()
-    all_admins = CustomUser.objects.filter(
-    admin_profile__can_access_dashboard=True
-).select_related("admin_profile")
+
+    proposals = TagProposal.objects.select_related(
+        "product",
+        "proposed_by"
+    ).all()
+
+    all_admins = (
+        CustomUser.objects
+        .filter(
+            admin_profile__can_access_dashboard=True
+        )
+        .select_related("admin_profile")
+    )
 
     context = {
-        'is_main_admin': is_main_admin,
-        'can_edit_price': can_edit_price,
-        'orders': orders_queryset,
-        'products': products,
-        'categories': categories,
-        'tags': tags,
-        'proposals': proposals,
-        'all_admins': all_admins,
-        'search_product': search_product,
-        'search_date': search_date,
-        'is_admin_view': True,
-        'contacts_form': contacts_form, # Передаем объект формы в шаблон
+        "is_main_admin": is_main_admin,
+        "can_edit_price": can_edit_price,
+        "orders": orders_queryset,
+        "products": products,
+        "categories": categories,
+        "tags": tags,
+        "proposals": proposals,
+        "all_admins": all_admins,
+        "search_product": search_product,
+        "search_date": search_date,
+        "is_admin_view": True,
+        "contacts_form": contacts_form,
+        "pending_products": pending_products,
     }
-    return render(request, 'store/admin_dashboard.html', context)
 
-
-
+    return render(
+        request,
+        "store/admin_dashboard.html",
+        context,
+    )
 
 def dashboard_login(request):
 
     if request.user.is_authenticated:
+        partner_profile = getattr(request.user, "partner_profile", None)
+
+        if partner_profile and partner_profile.is_active:
+            return redirect("partner_dashboard")
+
         return redirect("admin_dashboard")
 
     error = None
 
     if request.method == "POST":
-
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        user = authenticate( # type: ignore
+        user = authenticate(
             request,
             username=username,
             password=password
@@ -155,19 +226,33 @@ def dashboard_login(request):
             error = "Неверный логин или пароль."
 
         else:
+            # 1. Партнёр
+            partner_profile = getattr(
+                user,
+                "partner_profile",
+                None
+            )
 
-            profile = AdminProfile.objects.filter(user=user).first()
+            if partner_profile and partner_profile.is_active:
+                login(request, user)
+                return redirect("partner_dashboard")
+
+            # 2. Superuser или администратор
+            admin_profile = getattr(
+                user,
+                "admin_profile",
+                None
+            )
 
             if user.is_superuser or (
-                profile and profile.can_access_dashboard
+                admin_profile
+                and admin_profile.is_active
+                and admin_profile.can_access_dashboard
             ):
-
                 login(request, user)
-
                 return redirect("admin_dashboard")
 
-            else:
-                error = "У вас нет доступа к Dashboard."
+            error = "У вас нет доступа к панели управления."
 
     return render(
         request,
@@ -176,7 +261,6 @@ def dashboard_login(request):
             "error": error
         }
     )
-    
     
     
 def dashboard_logout(request):
@@ -224,7 +308,8 @@ def add_product(request):
                 new_product = Product.objects.create(
                     name=title, 
                     category=category_obj,
-                    image=uploaded_main_image
+                    image=uploaded_main_image,
+                    owner=request.user
                 )
                 
                 # 2. Привязываем выбранные теги к созданному товару
@@ -260,7 +345,7 @@ def add_product(request):
 @login_required
 @permission_required('store.delete_product', raise_exception=True)
 def delete_product(request, product_id):
-    product_item = get_object_or_404(Product, id=product_id)
+    product_item = partner_update_stock(request, product_id)
     product_name = product_item.name
     
     try:
@@ -276,25 +361,26 @@ def delete_product(request, product_id):
 
 # 1. ОБНОВЛЕНИЕ ИЛИ ДОБАВЛЕНИЕ ГЛАВНОГО ФОТО ТОВАРА ИЗ МЕДИАЦЕНТРА
 @login_required
-@permission_required('store.change_product', raise_exception=True)
+@permission_required("store.change_product", raise_exception=True)
 def admin_update_product_photo(request, product_id):
-    if request.method == "POST":
-        product = get_object_or_404(Product, id=product_id)
-        new_image = request.FILES.get('product_image')
-        
-        if new_image:
-            # Если старое фото было, физически удаляем его с жесткого диска, чтобы не копить мусор
-            if product.image:
-                old_path = os.path.join(settings.MEDIA_ROOT, str(product.image))
-                if os.path.exists(old_path):
-                    os.remove(old_path)
-            
-            product.image = new_image
-            product.save()
-            logger.info(f"Администратор обновил главное фото товара ID {product.id}")
-            
-    return redirect('admin_dashboard')
+    product = partner_update_stock(request, product_id)
 
+    if request.method == "POST":
+        new_image = request.FILES.get("product_image")
+
+        if new_image:
+            if product.image:
+                product.image.delete(save=False)
+
+            product.image = new_image
+            product.save(update_fields=["image"])
+
+            logger.info(
+                f"Пользователь {request.user.username} обновил "
+                f"главное фото товара ID {product.id}"
+            )
+
+    return redirect("admin_dashboard")
 
 
 
@@ -302,7 +388,7 @@ def admin_update_product_photo(request, product_id):
 @login_required
 @permission_required('store.change_product', raise_exception=True)
 def admin_delete_product_photo(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
+    product = partner_update_stock(request, product_id)
     photo_type = request.GET.get('type', 'main') # Получаем параметр: main или gallery
     
     if photo_type == 'main' and product.image:
@@ -329,11 +415,49 @@ def admin_delete_product_photo(request, product_id):
 
     return redirect('admin_dashboard')
 
+@login_required
+def admin_update_stock(request, product_id):
+    product = partner_update_stock(request, product_id)
 
+    if request.method == "POST":
+        try:
+            new_stock = int(request.POST.get("stock", 0))
+
+            if new_stock < 0:
+                return HttpResponse(
+                    "Остаток не может быть отрицательным.",
+                    status=400
+                )
+
+            details = get_object_or_404(
+                ProductDetails,
+                product=product
+            )
+
+            details.stock = new_stock
+            details.save(update_fields=["stock"])
+
+            logger.info(
+                f"Пользователь {request.user} изменил остаток "
+                f"товара '{product.name}' (ID: {product.id}) "
+                f"на {new_stock}"
+            )
+
+            return redirect("admin_dashboard")
+
+        except (ValueError, TypeError):
+            return HttpResponse(
+                "Некорректное количество товара.",
+                status=400
+            )
+
+    return HttpResponse("Метод не разрешён.", status=405)
 
 # 2. Изменение цены товара
 @login_required
+@dashboard_permission("can_change_prices")
 def admin_update_price(request, product_id):
+    product = partner_update_stock(request, product_id)
     if not (request.user.is_superuser or request.user.is_staff):
         raise PermissionDenied()
         
@@ -422,6 +546,7 @@ def admin_approve_tag(request, proposal_id):
 
 # Создание новой категории (Только для Главного Админа)
 @login_required
+@dashboard_permission("can_manage_categories")
 def admin_create_category(request):
     if not request.user.is_superuser:
         raise PermissionDenied("Доступ запрещен. Только для Главного Админа.")
@@ -456,5 +581,92 @@ from django.shortcuts import render, redirect  # Убедитесь, что redi
 from .forms import StoreContactForm           # <-- ДОБАВЬТЕ ИМПОРТ ФОРМЫ
 
 
+# ДЛЯ БЛОКИРОВКИ ТОВАРА 
+@login_required
+def toggle_product_active(request, product_id):
+    product = partner_update_stock(request, product_id)
+
+    if request.method == "POST":
+        product.is_active = not product.is_active
+        product.save(update_fields=["is_active"])
+
+    return redirect("admin_dashboard")
+
+@login_required
+def approve_product(request, product_id):
+
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+    product = get_object_or_404(
+        Product,
+        id=product_id
+    )
+
+    listing = getattr(
+        product,
+        "listing",
+        None
+    )
+
+    if not listing:
+        return HttpResponse(
+            "У товара нет объявления для модерации",
+            status=400
+        )
 
 
+    listing.moderation_status = "approved"
+    listing.is_active = True
+    listing.moderation_comment = ""
+    listing.save()
+
+
+    return redirect(
+        "admin_dashboard"
+    )
+
+@login_required
+def reject_product(request, product_id):
+
+    if not request.user.is_superuser:
+        raise PermissionDenied
+
+
+    product = get_object_or_404(
+        Product,
+        id=product_id
+    )
+
+
+    listing = product.listing
+
+
+    if request.method == "POST":
+
+        listing.moderation_status = "rejected"
+
+        listing.is_active = False
+
+        listing.moderation_comment = request.POST.get(
+            "comment",
+            ""
+        )
+
+        listing.save()
+
+
+        return redirect(
+            "admin_dashboard"
+        )
+
+
+    return render(
+        request,
+        "store/reject_product.html",
+        {
+            "product": product,
+        },
+    )
+    
+    
