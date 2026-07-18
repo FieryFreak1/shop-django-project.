@@ -3,13 +3,173 @@
 {% block title %}О нас — ZoneShop{% endblock %}
 
 {% block content %}
-    <h2>О магазине ZoneShop</h2>
-    <p>Дата основания: 2026 год.</p>
+<style>
+    .about-page {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0;
+        max-width: 800px;
+        margin: 40px auto;
+    }
     
-    <h3>Права потребителей:</h3>
-    <ul>
-        <li>Право на качество товара</li>
-        <li>Право на безопасность</li>
-        <li>Право на обмен в течение 14 дней</li>
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f1f5f9;
+    }
+    
+    .header-icon {
+        font-size: 48px;
+        background: linear-gradient(135deg, #cb11ab, #0071e3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    h2 {
+        color: #1e293b;
+        font-size: 36px;
+        margin: 0;
+        line-height: 1.2;
+    }
+    
+    .founding-date {
+        display: inline-block;
+        background: #eff6ff;
+        color: #1e40af;
+        padding: 6px 14px;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 14px;
+        border: 1px solid #bfdbfe;
+        margin-top: 10px;
+    }
+    
+    .rights-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .rights-list li {
+        background: #f8fafc;
+        border-left: 4px solid #28a745;
+        padding: 15px 20px;
+        margin-bottom: 10px;
+        border-radius: 0 8px 8px 0;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        font-size: 15px;
+        color: #334155;
+    }
+    
+    .rights-list li:hover {
+        transform: translateX(4px);
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+
+/* ===== ZoneShop 2026 Aurora UI Upgrade ===== */
+:root{
+ --bg:#f6f7fb;
+ --surface:rgba(255,255,255,.82);
+ --text:#111827;
+ --muted:#64748b;
+ --primary:#6d28d9;
+ --primary2:#ec4899;
+ --accent:#06b6d4;
+ --success:#16a34a;
+ --radius:24px;
+ --shadow:0 20px 60px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box;scroll-behavior:smooth}
+body{
+ background:
+ radial-gradient(circle at 10% 10%,rgba(124,58,237,.14),transparent 30%),
+ radial-gradient(circle at 90% 0,rgba(6,182,212,.12),transparent 28%),
+ var(--bg)!important;
+ color:var(--text)!important;
+ font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;
+}
+header,.admin-header{
+ backdrop-filter:blur(18px)!important;
+ background:linear-gradient(135deg,#111827ee,#312e81ee)!important;
+ border-bottom:1px solid rgba(255,255,255,.15)!important;
+}
+main,.admin-main,.card,.block,.info-box,.cart-container,.about-page,.page-box,.detail-container,.reviews-section{
+ border-radius:var(--radius)!important;
+ box-shadow:var(--shadow)!important;
+ border:1px solid rgba(255,255,255,.65)!important;
+ backdrop-filter:blur(14px);
+}
+button,.btn,.wb-btn-cart,.btn-main-buy,.add-product-button{
+ background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+ border:none!important;
+ border-radius:16px!important;
+ padding:12px 22px!important;
+ box-shadow:0 12px 25px rgba(109,40,217,.25);
+ transition:.25s ease!important;
+}
+button:hover,.btn:hover,.wb-btn-cart:hover,.btn-main-buy:hover,.add-product-button:hover{
+ transform:translateY(-3px) scale(1.02)!important;
+}
+input,select,textarea{
+ background:rgba(255,255,255,.9)!important;
+ border:1px solid #dbeafe!important;
+ border-radius:16px!important;
+ padding:14px!important;
+ transition:.2s!important;
+}
+input:focus,select:focus,textarea:focus{
+ outline:none!important;
+ border-color:#8b5cf6!important;
+ box-shadow:0 0 0 5px rgba(139,92,246,.15)!important;
+}
+.wb-card,.partner-card,.stat-card,.card{
+ border-radius:24px!important;
+ overflow:hidden;
+ transition:.3s cubic-bezier(.2,.8,.2,1)!important;
+}
+.wb-card:hover,.partner-card:hover,.stat-card:hover,.card:hover{
+ transform:translateY(-8px)!important;
+ box-shadow:0 25px 70px rgba(15,23,42,.16)!important;
+}
+h1,h2,h3{letter-spacing:-.03em}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8b5cf6,#ec4899);border-radius:20px}
+/* floating glow */
+.aurora-dot{
+ position:fixed;width:240px;height:240px;border-radius:50%;
+ filter:blur(80px);opacity:.25;pointer-events:none;z-index:-1;
+ background:#8b5cf6;top:10%;left:5%
+}
+@media(max-width:700px){
+ main,.admin-main{padding:18px!important}
+ .detail-container{grid-template-columns:1fr!important;padding:20px!important}
+}
+
+</style>
+
+<div class="about-page">
+    <div class="page-header">
+        <span class="header-icon">🏪</span>
+        <div>
+            <h2>О магазине ZoneShop</h2>
+            <span class="founding-date">📅 Работаем с 2026 года</span>
+        </div>
+    </div>
+
+    <p style="font-size: 16px; line-height: 1.6; color: #475569; margin-bottom: 30px;">
+        Мы создаем пространство, где каждый покупатель чувствует себя уверенно. Наша миссия — предлагать только проверенные товары и обеспечивать сервис уровня мировых стандартов.
+    </p>
+    
+    <h3 style="color: #1e293b; margin-bottom: 20px;">Ваши права в ZoneShop:</h3>
+    <ul class="rights-list">
+        <li>✅ Право на качество товара (гарантия подлинности)</li>
+        <li>✅ Право на безопасность (проверенная продукция)</li>
+        <li>✅ Право на обмен в течение 14 дней без лишних вопросов</li>
     </ul>
+</div>
 {% endblock %}

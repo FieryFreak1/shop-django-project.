@@ -1,0 +1,168 @@
+{% extends "store/base.html" %}
+
+
+{% block content %}
+
+
+<h2>
+Редактирование товара
+</h2>
+
+
+
+<p>
+Текущий статус:
+
+{% if listing.moderation_status == "pending" %}
+🟡 На модерации
+
+{% elif listing.moderation_status == "approved" %}
+🟢 Опубликован
+
+{% else %}
+🔴 Отклонён
+
+{% endif %}
+
+</p>
+
+
+
+{% if listing.moderation_status == "rejected" %}
+
+<div>
+
+<strong>
+Причина:
+</strong>
+
+<br>
+
+{{ listing.moderation_comment }}
+
+</div>
+
+{% endif %}
+
+
+
+<hr>
+
+
+
+<form method="POST" enctype="multipart/form-data">
+
+{% csrf_token %}
+
+
+<input
+name="title"
+value="{{ product.name }}"
+>
+
+
+
+<input
+name="price"
+value="{{ product.details.price }}"
+>
+
+
+
+<input
+name="stock"
+value="{{ product.details.stock }}"
+>
+
+
+
+<select name="category">
+
+
+{% for cat in categories %}
+
+<option
+value="{{ cat.id }}"
+{% if cat.id == product.category.id %}
+selected
+{% endif %}
+>
+
+{{ cat.name }}
+
+</option>
+
+
+{% endfor %}
+
+
+</select>
+
+
+
+<br>
+
+
+
+<input
+type="file"
+name="product_image"
+>
+
+
+
+<input
+type="file"
+name="gallery_images"
+multiple
+>
+
+
+
+
+<h4>
+Теги
+</h4>
+
+
+{% for tag in tags %}
+
+<label>
+
+
+<input
+type="checkbox"
+name="selected_tags"
+value="{{ tag.id }}"
+{% if tag in product.tags.all %}
+checked
+{% endif %}
+>
+
+
+{{ tag.name }}
+
+
+</label>
+
+
+<br>
+
+
+{% endfor %}
+
+
+
+<button>
+
+Сохранить и отправить на модерацию
+
+</button>
+
+
+
+</form>
+
+
+
+{% endblock %}

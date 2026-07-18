@@ -1,24 +1,219 @@
 {% extends 'base.html' %}
-
 {% block title %}Заказ успешно оплачен! — ZoneShop{% endblock %}
 
 {% block content %}
-    <div style="text-align: center; padding: 30px; border: 2px solid #28a745; background-color: #e8f5e9; border-radius: 8px;">
-        <h2 style="color: #28a745;">🎉 Спасибо за покупку!</h2>
-        <p>Ваш заказ успешно обработан и оплачен.</p>
+<style>
+    /* Основной контейнер */
+    .success-container {
+        background: white;
+        padding: 40px;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.08);
+        border: 1px solid #e2e8f0;
+        max-width: 500px;
+        margin: 60px auto;
+        text-align: center;
+    }
+    
+    /* Иконка успеха */
+    .icon-success {
+        font-size: 64px;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+    
+    /* Заголовок */
+    h2 {
+        color: #1e293b;
+        font-size: 32px;
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    
+    /* Текстовое сообщение */
+    p {
+        color: #475569;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+    
+    /* Блок с уникальным кодом (самый важный элемент) */
+    .code-box {
+        position: relative;
+        display: inline-block;
+        padding: 20px 30px;
+        background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+        border-radius: 12px;
+        border: 1px dashed #28a745;
+        margin-bottom: 25px;
         
-        <div style="margin: 20px 0; padding: 15px; background-color: white; border: 1px dashed #28a745; display: inline-block;">
-            <span style="font-size: 14px; color: #555;">Уникальный код вашего заказа:</span><br>
-            <strong style="font-size: 24px; letter-spacing: 2px; color: #333;">{{ order.unique_code }}</strong>
-        </div>
-        
-        <p style="color: #666; font-size: 14px;">
-            Сохраните этот код. По нему менеджер сможет найти ваш заказ (IP: {{ order.ip_address }}).
-        </p>
-        
-        <p>Итоговая стоимость: <strong>{{ order.total_price }} руб.</strong></p>
-    </div>
+        animation: floatUp 0.6s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    @keyframes floatUp {
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+    
+    .label-code {
+        font-size: 14px;
+        color: #64748b;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+        display: block;
+    }
+    
+    .order-code {
+        font-size: 36px;
+        font-weight: bold;
+        color: #1e293b;
+        letter-spacing: 3px;
+        word-break: break-all;
+        font-family: monospace;
+    }
+    
+    /* Итоговая сумма */
+    .total-price {
+        font-size: 18px;
+        color: #334155;
+        margin-top: 10px;
+    }
+    
+    .total-price strong {
+        color: #cb11ab;
+        font-size: 22px;
+    }
+    
+    /* Кнопка возврата */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        transition: all 0.2s ease;
+    }
+    
+    .back-link:hover {
+        background: #f8fafc;
+        color: #2c3e50;
+        transform: translateY(-2px);
+    }
 
+/* ===== ZoneShop 2026 Aurora UI Upgrade ===== */
+:root{
+ --bg:#f6f7fb;
+ --surface:rgba(255,255,255,.82);
+ --text:#111827;
+ --muted:#64748b;
+ --primary:#6d28d9;
+ --primary2:#ec4899;
+ --accent:#06b6d4;
+ --success:#16a34a;
+ --radius:24px;
+ --shadow:0 20px 60px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box;scroll-behavior:smooth}
+body{
+ background:
+ radial-gradient(circle at 10% 10%,rgba(124,58,237,.14),transparent 30%),
+ radial-gradient(circle at 90% 0,rgba(6,182,212,.12),transparent 28%),
+ var(--bg)!important;
+ color:var(--text)!important;
+ font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;
+}
+header,.admin-header{
+ backdrop-filter:blur(18px)!important;
+ background:linear-gradient(135deg,#111827ee,#312e81ee)!important;
+ border-bottom:1px solid rgba(255,255,255,.15)!important;
+}
+main,.admin-main,.card,.block,.info-box,.cart-container,.about-page,.page-box,.detail-container,.reviews-section{
+ border-radius:var(--radius)!important;
+ box-shadow:var(--shadow)!important;
+ border:1px solid rgba(255,255,255,.65)!important;
+ backdrop-filter:blur(14px);
+}
+button,.btn,.wb-btn-cart,.btn-main-buy,.add-product-button{
+ background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+ border:none!important;
+ border-radius:16px!important;
+ padding:12px 22px!important;
+ box-shadow:0 12px 25px rgba(109,40,217,.25);
+ transition:.25s ease!important;
+}
+button:hover,.btn:hover,.wb-btn-cart:hover,.btn-main-buy:hover,.add-product-button:hover{
+ transform:translateY(-3px) scale(1.02)!important;
+}
+input,select,textarea{
+ background:rgba(255,255,255,.9)!important;
+ border:1px solid #dbeafe!important;
+ border-radius:16px!important;
+ padding:14px!important;
+ transition:.2s!important;
+}
+input:focus,select:focus,textarea:focus{
+ outline:none!important;
+ border-color:#8b5cf6!important;
+ box-shadow:0 0 0 5px rgba(139,92,246,.15)!important;
+}
+.wb-card,.partner-card,.stat-card,.card{
+ border-radius:24px!important;
+ overflow:hidden;
+ transition:.3s cubic-bezier(.2,.8,.2,1)!important;
+}
+.wb-card:hover,.partner-card:hover,.stat-card:hover,.card:hover{
+ transform:translateY(-8px)!important;
+ box-shadow:0 25px 70px rgba(15,23,42,.16)!important;
+}
+h1,h2,h3{letter-spacing:-.03em}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8b5cf6,#ec4899);border-radius:20px}
+/* floating glow */
+.aurora-dot{
+ position:fixed;width:240px;height:240px;border-radius:50%;
+ filter:blur(80px);opacity:.25;pointer-events:none;z-index:-1;
+ background:#8b5cf6;top:10%;left:5%
+}
+@media(max-width:700px){
+ main,.admin-main{padding:18px!important}
+ .detail-container{grid-template-columns:1fr!important;padding:20px!important}
+}
+
+</style>
+
+<div class="success-container">
+    <div class="icon-success">🎉</div>
+    <h2>Спасибо за покупку!</h2>
+    <p>Ваш заказ успешно обработан и оплачен банковской картой.</p>
+    
+    <!-- Уникальный код заказа -->
+    <div class="code-box">
+        <span class="label-code">Уникальный код вашего заказа:</span>
+        <strong class="order-code">{{ order.unique_code }}</strong>
+    </div>
+    
+    <p style="font-size: 14px; color: #64748b;">Сохраните этот код. По нему менеджер найдет ваш заказ в системе.</p>
+    
+    <!-- Сумма -->
+    <div class="total-price">
+        Итоговая стоимость: <strong>{{ order.total_price|floatformat:2 }} ₽</strong>
+    </div>
+    
+    <!-- Ссылка назад -->
     <br><br>
-    <a href="{% url 'index' %}">← На главную страницу</a>
+    <a href="{% url 'index' %}" class="back-link">
+        ← На главную страницу каталога
+    </a>
+</div>
 {% endblock %}

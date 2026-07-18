@@ -1,0 +1,379 @@
+{% extends 'admin_base.html' %}
+
+{% block title %}Мои товары{% endblock %}
+
+{% block content %}
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .product-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    .product-table th,
+    .product-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+    }
+
+    .product-table th {
+        background: #0f172a;
+        color: white;
+    }
+
+    .product-image {
+        width: 55px;
+        height: 55px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .stock-form {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .stock-input {
+        width: 80px;
+        padding: 6px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+    }
+
+    .stock-button {
+        padding: 6px 10px;
+        border: none;
+        border-radius: 6px;
+        background: #0f172a;
+        color: white;
+        cursor: pointer;
+    }
+
+    .stock-button:hover {
+        background: #1e293b;
+    }
+
+    .status-active {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    .status-empty {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .status-blocked {
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .empty {
+        padding: 30px;
+        text-align: center;
+        color: #64748b;
+    }
+
+    .add-product-button {
+        padding: 12px 18px;
+        background: #16a34a;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+    }
+    
+    .add-product-button:hover {
+        background: #15803d;
+    }
+
+    .badge{
+        display:inline-block;
+        padding:5px 10px;
+        border-radius:20px;
+        font-size:13px;
+        font-weight:600;
+    }
+    
+    .badge.pending{
+        background:#fef3c7;
+        color:#92400e;
+    }
+    
+    .badge.approved{
+        background:#dcfce7;
+        color:#166534;
+    }
+    
+    .badge.rejected{
+        background:#fee2e2;
+        color:#991b1b;
+    }
+
+
+/* ===== ZoneShop 2026 Aurora UI Upgrade ===== */
+:root{
+ --bg:#f6f7fb;
+ --surface:rgba(255,255,255,.82);
+ --text:#111827;
+ --muted:#64748b;
+ --primary:#6d28d9;
+ --primary2:#ec4899;
+ --accent:#06b6d4;
+ --success:#16a34a;
+ --radius:24px;
+ --shadow:0 20px 60px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box;scroll-behavior:smooth}
+body{
+ background:
+ radial-gradient(circle at 10% 10%,rgba(124,58,237,.14),transparent 30%),
+ radial-gradient(circle at 90% 0,rgba(6,182,212,.12),transparent 28%),
+ var(--bg)!important;
+ color:var(--text)!important;
+ font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;
+}
+header,.admin-header{
+ backdrop-filter:blur(18px)!important;
+ background:linear-gradient(135deg,#111827ee,#312e81ee)!important;
+ border-bottom:1px solid rgba(255,255,255,.15)!important;
+}
+main,.admin-main,.card,.block,.info-box,.cart-container,.about-page,.page-box,.detail-container,.reviews-section{
+ border-radius:var(--radius)!important;
+ box-shadow:var(--shadow)!important;
+ border:1px solid rgba(255,255,255,.65)!important;
+ backdrop-filter:blur(14px);
+}
+button,.btn,.wb-btn-cart,.btn-main-buy,.add-product-button{
+ background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+ border:none!important;
+ border-radius:16px!important;
+ padding:12px 22px!important;
+ box-shadow:0 12px 25px rgba(109,40,217,.25);
+ transition:.25s ease!important;
+}
+button:hover,.btn:hover,.wb-btn-cart:hover,.btn-main-buy:hover,.add-product-button:hover{
+ transform:translateY(-3px) scale(1.02)!important;
+}
+input,select,textarea{
+ background:rgba(255,255,255,.9)!important;
+ border:1px solid #dbeafe!important;
+ border-radius:16px!important;
+ padding:14px!important;
+ transition:.2s!important;
+}
+input:focus,select:focus,textarea:focus{
+ outline:none!important;
+ border-color:#8b5cf6!important;
+ box-shadow:0 0 0 5px rgba(139,92,246,.15)!important;
+}
+.wb-card,.partner-card,.stat-card,.card{
+ border-radius:24px!important;
+ overflow:hidden;
+ transition:.3s cubic-bezier(.2,.8,.2,1)!important;
+}
+.wb-card:hover,.partner-card:hover,.stat-card:hover,.card:hover{
+ transform:translateY(-8px)!important;
+ box-shadow:0 25px 70px rgba(15,23,42,.16)!important;
+}
+h1,h2,h3{letter-spacing:-.03em}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8b5cf6,#ec4899);border-radius:20px}
+/* floating glow */
+.aurora-dot{
+ position:fixed;width:240px;height:240px;border-radius:50%;
+ filter:blur(80px);opacity:.25;pointer-events:none;z-index:-1;
+ background:#8b5cf6;top:10%;left:5%
+}
+@media(max-width:700px){
+ main,.admin-main{padding:18px!important}
+ .detail-container{grid-template-columns:1fr!important;padding:20px!important}
+}
+
+</style>
+
+<div class="page-header">
+    <div>
+        <h1>Мои товары</h1>
+        <p>Товары владельца: {{ request.user.username }}</p>
+    </div>
+
+    <a href="{% url 'partner_add_product' %}" class="add-product-button">
+        ➕ Добавить товар
+    </a>
+</div>
+
+{% if products %}
+    <table class="product-table">
+        <thead>
+            <tr>
+                <th>Фото</th>
+                <th>Название</th>
+                <th>Статус</th>
+                <th>Категория</th>
+                <th>Цена</th>
+                <th>Остаток</th>
+                <th>Продажи</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for product in products %}
+                <tr>
+                    <!-- ФОТО -->
+                    <td>
+                        {% if product.image %}
+                            <img
+                                src="{{ product.image.url }}"
+                                class="product-image"
+                                alt="{{ product.name }}"
+                            >
+                        {% else %}
+                            Нет фото
+                        {% endif %}
+                    </td>
+
+                    <!-- НАЗВАНИЕ -->
+                    <td>
+                        {{ product.name }}
+                    </td>
+                    
+                    <!-- МОДЕРАЦИЯ -->
+                    <td>
+
+                        {% if product.listing.moderation_status == "pending" %}
+
+                            <span style="color:#ca8a04;font-weight:600;">
+                                🟡 На проверке
+                            </span>
+
+                        {% elif product.listing.moderation_status == "approved" %}
+
+                            <span style="color:#16a34a;font-weight:600;">
+                                🟢 Одобрен
+                            </span>
+
+                        {% elif product.listing.moderation_status == "rejected" %}
+
+                            <div style="margin-top:10px;">
+                                <div style="color:#dc2626;font-weight:bold;">
+                                    ❌ Товар отклонён
+                                </div>
+
+                                {% if product.rejection_comment %}
+                                    <div style="margin-top:6px;color:#64748b;">
+                                        <strong>Причина:</strong><br>
+                                        {{ product.rejection_comment }}
+                                    </div>
+                                {% endif %}
+
+                                <a
+                                    href="{% url 'partner_edit_product' product.id %}"
+                                    class="btn btn-warning"
+                                    style="margin-top:10px;display:inline-block;"
+                                >
+                                    ✏️ Исправить и отправить повторно
+                                </a>
+                            </div>
+
+                        {% endif %}
+                    
+                    </td>
+                    
+                    <td>
+                        {{ product.category }}
+                    </td>
+
+                    <!-- ЦЕНА -->
+                    <td>
+                        {% if product.details %}
+                            {{ product.details.price }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <!-- ОСТАТОК -->
+                    <td>
+                        {% if product.details %}
+
+                            {% if not product.is_active %}
+                                <div class="status-blocked">
+                                    🔒 Заблокирован
+                                </div>
+
+                            {% elif product.details.stock <= 0 %}
+                                <div class="status-empty">
+                                    🔴 Нет в наличии
+                                </div>
+
+                            {% else %}
+                                <div class="status-active">
+                                    🟢 В наличии: {{ product.details.stock }}
+                                </div>
+                            {% endif %}
+
+                            <form
+                                method="POST"
+                                action="{% url 'admin_update_stock' product.id %}"
+                                class="stock-form"
+                            >
+                                {% csrf_token %}
+
+                                <input
+                                    type="number"
+                                    name="stock"
+                                    min="0"
+                                    value="{{ product.details.stock }}"
+                                    required
+                                    class="stock-input"
+                                >
+
+                                <button
+                                    type="submit"
+                                    class="stock-button"
+                                >
+                                    📦 Сохранить
+                                </button>
+                            </form>
+
+                        {% else %}
+                            —
+                        {% endif %}
+                    </td>
+
+                    <!-- ПРОДАЖИ -->
+                    <td>
+                        {% if product.details %}
+                            {{ product.details.sales_count }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% else %}
+    <div class="empty">
+        <h3>У вас пока нет товаров</h3>
+        <p>Товары должны иметь owner = текущий пользователь.</p>
+    </div>
+{% endif %}
+
+{% endblock %}

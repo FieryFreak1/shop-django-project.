@@ -1,0 +1,260 @@
+{% extends "store/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>
+        🏪 Кабинет продавца
+    </h2>
+
+    <p>
+        Пользователь:
+        <strong>{{ request.user.username }}</strong>
+    </p>
+
+
+    <hr>
+
+
+    <div class="mb-3">
+
+        <a 
+        href="{% url 'seller_add_product' %}"
+        class="btn btn-primary"
+        >
+            ➕ Добавить товар
+        </a>
+
+
+        <a 
+        href="{% url 'seller_products' %}"
+        class="btn btn-secondary"
+        >
+            📦 Мои товары
+        </a>
+
+    </div>
+
+
+
+    <h3>
+        📋 Мои объявления
+    </h3>
+
+
+
+    {% for listing in listings %}
+
+
+    <div class="card mb-3 shadow-sm">
+
+        <div class="card-body">
+
+
+            <h4>
+                {{ listing.product.name }}
+            </h4>
+
+
+
+            {% if listing.product.image %}
+
+            <img
+            src="{{ listing.product.image.url }}"
+            width="160"
+            class="mb-3"
+            >
+
+            {% endif %}
+
+
+
+
+            <p>
+
+                <strong>
+                    Статус:
+                </strong>
+
+
+                {% if listing.moderation_status == "pending" %}
+
+                    <span class="badge bg-warning text-dark">
+                        🟡 На модерации
+                    </span>
+
+
+                {% elif listing.moderation_status == "approved" %}
+
+                    <span class="badge bg-success">
+                        🟢 Опубликован
+                    </span>
+
+
+                {% elif listing.moderation_status == "rejected" %}
+
+                    <span class="badge bg-danger">
+                        🔴 Отклонён
+                    </span>
+
+
+                {% endif %}
+
+            </p>
+
+
+
+
+            {% if listing.moderation_status == "rejected" %}
+
+            <div class="alert alert-danger">
+
+                <strong>
+                    Причина отклонения:
+                </strong>
+
+                <br>
+
+                {{ listing.moderation_comment }}
+
+            </div>
+
+
+            {% endif %}
+
+
+
+
+            <p>
+
+                <strong>
+                    Цена:
+                </strong>
+
+
+                {% if listing.product.details %}
+
+                    {{ listing.product.details.price }} ₽
+
+                {% else %}
+
+                    Не указана
+
+                {% endif %}
+
+            </p>
+
+
+
+
+            <p>
+
+                <strong>
+                    Остаток:
+                </strong>
+
+
+                {% if listing.product.details %}
+
+                    {{ listing.product.details.stock }}
+
+                {% else %}
+
+                    0
+
+                {% endif %}
+
+            </p>
+
+
+
+
+            <p>
+
+                <strong>
+                    Добавлено:
+                </strong>
+
+                {{ listing.created_at|date:"d.m.Y H:i" }}
+
+            </p>
+
+
+
+
+
+            {% if listing.moderation_status == "rejected" %}
+
+
+            <a
+            href="{% url 'seller_edit_product' listing.product.id %}"
+            class="btn btn-warning"
+            >
+
+                ✏ Исправить товар
+
+            </a>
+
+
+            {% endif %}
+
+
+
+
+
+            {% if listing.moderation_status == "approved" %}
+
+
+            <span class="text-success">
+
+                ✔ Товар доступен покупателям
+
+            </span>
+
+
+            {% endif %}
+
+
+
+        </div>
+
+    </div>
+
+
+
+    {% empty %}
+
+
+    <div class="alert alert-info">
+
+        У вас пока нет товаров.
+
+    </div>
+
+
+    {% endfor %}
+
+
+
+
+
+    <hr>
+
+
+
+    <a
+    href="{% url 'seller_dashboard' %}"
+    class="btn btn-outline-secondary"
+    >
+
+        🔄 Обновить
+
+    </a>
+
+
+
+</div>
+
+
+{% endblock %}

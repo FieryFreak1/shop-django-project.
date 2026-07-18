@@ -1,0 +1,262 @@
+{% extends "store/base.html" %}
+
+
+{% block content %}
+
+
+<div class="container mt-4">
+
+
+<h2>
+📦 Мои товары
+</h2>
+
+
+
+<a 
+href="{% url 'seller_add_product' %}"
+class="btn btn-primary"
+>
+➕ Добавить товар
+</a>
+
+
+
+<hr>
+
+
+
+
+{% for listing in listings %}
+
+
+
+<div class="card p-3 mb-4 shadow-sm">
+
+
+
+<h3>
+{{ listing.product.name }}
+</h3>
+
+
+
+<!-- Главное фото -->
+
+{% if listing.product.image %}
+
+<img 
+src="{{ listing.product.image.url }}"
+width="150"
+class="mb-3"
+>
+
+{% endif %}
+
+
+
+
+<!-- Галерея -->
+
+{% for image in listing.product.images.all %}
+
+<img
+src="{{ image.image.url }}"
+width="80"
+>
+
+{% endfor %}
+
+
+
+
+
+<p>
+
+<strong>
+Категория:
+</strong>
+
+
+{% if listing.product.category %}
+
+{{ listing.product.category.name }}
+
+{% else %}
+
+Без категории
+
+{% endif %}
+
+
+</p>
+
+
+
+
+
+<p>
+
+<strong>
+Цена:
+</strong>
+
+
+{% if listing.product.details %}
+
+{{ listing.product.details.price }} ₽
+
+
+{% else %}
+
+Не указана
+
+
+{% endif %}
+
+
+</p>
+
+
+
+
+
+<p>
+
+<strong>
+Остаток:
+</strong>
+
+
+{% if listing.product.details %}
+
+{{ listing.product.details.stock }}
+
+
+{% else %}
+
+0
+
+
+{% endif %}
+
+
+</p>
+
+
+
+
+
+
+<p>
+
+
+<strong>
+Статус:
+</strong>
+
+
+
+{% if listing.moderation_status == "pending" %}
+
+<span class="badge bg-warning text-dark">
+🟡 На модерации
+</span>
+
+
+{% elif listing.moderation_status == "approved" %}
+
+<span class="badge bg-success">
+🟢 Опубликован
+</span>
+
+
+{% elif listing.moderation_status == "rejected" %}
+
+<span class="badge bg-danger">
+🔴 Отклонён
+</span>
+
+
+{% endif %}
+
+
+
+</p>
+
+
+
+
+
+
+
+{% if listing.moderation_status == "rejected" %}
+
+
+<div class="alert alert-danger">
+
+
+<strong>
+Причина:
+</strong>
+
+
+<br>
+
+
+{{ listing.moderation_comment }}
+
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+
+
+
+<a 
+href="{% url 'seller_edit_product' listing.product.id %}"
+class="btn btn-warning"
+>
+
+✏ Редактировать
+
+
+</a>
+
+
+
+
+
+</div>
+
+
+
+{% empty %}
+
+
+
+<div class="alert alert-info">
+
+У вас пока нет товаров.
+
+
+</div>
+
+
+
+{% endfor %}
+
+
+
+
+</div>
+
+
+
+{% endblock %}

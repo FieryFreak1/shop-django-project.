@@ -1,50 +1,278 @@
 {% extends 'base.html' %}
-
 {% block title %}Ваша корзина — ZoneShop{% endblock %}
 
 {% block content %}
 <style>
-    .cart-container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-    .cart-title { font-size: 24px; color: #1e293b; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-    .cart-subtitle { font-size: 13px; color: #64748b; margin-bottom: 25px; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: inline-block; }
-    .cart-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-    .cart-table th { background: #f8fafc; color: #475569; font-weight: 600; padding: 14px; text-align: left; border-bottom: 2px solid #e2e8f0; font-size: 14px; }
-    .cart-table td { padding: 16px; border-bottom: 1px solid #e2e8f0; font-size: 15px; color: #334155; vertical-align: middle; }
-    .row-unchecked { opacity: 0.55; background-color: #f8fafc; }
-    .btn-toggle-box { text-decoration: none; font-size: 22px; cursor: pointer; display: inline-block; }
-    .product-info-name { font-weight: 600; color: #1e293b; }
-    .price-tag { font-weight: 600; color: #0f172a; }
-    .quantity-badge { background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; }
-    .btn-delete-item { color: #e74c3c; text-decoration: none; font-size: 13px; font-weight: bold; }
-    .btn-delete-item:hover { text-decoration: underline; }
-    .checkout-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 1px solid #e2e8f0; }
-    .btn-checkout { padding: 12px 28px; background: #28a745; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(40,167,69,0.2); }
-    .btn-checkout:hover { background: #218838; }
-    .back-link { color: #64748b; text-decoration: none; font-size: 14px; font-weight: 500; }
-    .cart-empty { text-align: center; padding: 20px; color: #64748b; }
-    .cart-empty a { color: #3182ce; text-decoration: none; font-weight: bold; }
+    /* Основной контейнер корзины */
+    .cart-container {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.05);
+        border: 1px solid #e2e8f0;
+        max-width: 600px;
+        margin: 40px auto;
+    }
+    
+    /* Заголовок */
+    .cart-title {
+        font-size: 28px;
+        color: #1e293b;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    /* Подсказка о таймере */
+    .cart-subtitle {
+        font-size: 14px;
+        color: #64748b;
+        margin-bottom: 30px;
+        background: #f1f5f9;
+        padding: 10px 14px;
+        border-radius: 8px;
+    }
+    
+    /* Таблица товаров */
+    .cart-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+    
+    .cart-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        padding: 14px;
+        text-align: left;
+        border-bottom: 2px solid #e2e8f0;
+        font-size: 16px;
+    }
+    
+    .cart-table td {
+        padding: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 16px;
+        color: #334155;
+        vertical-align: middle;
+    }
+    
+    /* Неактивные товары (без галочки) */
+    .row-unchecked {
+        opacity: 0.5;
+        background: #fafafa;
+    }
+    
+    /* Кнопка выбора товара */
+    .btn-toggle-box {
+        text-decoration: none;
+        font-size: 24px;
+        cursor: pointer;
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #eaf2f7;
+        border: 1px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-toggle-box:hover {
+        transform: scale(1.05);
+        background: #e0f2fe;
+    }
+    
+    /* Цена товара */
+    .price-tag {
+        font-weight: bold;
+        color: #0f172a;
+    }
+    
+    /* Количество */
+    .quantity-badge {
+        background: #f1f5f9;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    /* Кнопка удаления */
+    .btn-delete-item {
+        color: #e74c3c;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 6px 12px;
+        border-radius: 6px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        transition: color 0.2s ease;
+    }
+    
+    .btn-delete-item:hover {
+        color: #c0392b;
+    }
+    
+    /* Подвал формы */
+    .checkout-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 25px;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    /* Кнопка оплаты */
+    .btn-checkout {
+        padding: 14px 28px;
+        background: linear-gradient(135deg, #28a745, #218838);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(40,167,69,.2);
+        transition: background .2s ease;
+    }
+    
+    .btn-checkout:hover {
+        background: linear-gradient(135deg, #218838, #196f3d);
+    }
+    
+    /* Ссылка назад */
+    .back-link {
+        color: #64748b;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+    }
+    
+    /* Пустой контейнер */
+    .cart-empty {
+        text-align: center;
+        padding: 40px;
+        color: #64748b;
+    }
+    
+    .cart-empty a {
+        color: #3182ce;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+/* ===== ZoneShop 2026 Aurora UI Upgrade ===== */
+:root{
+ --bg:#f6f7fb;
+ --surface:rgba(255,255,255,.82);
+ --text:#111827;
+ --muted:#64748b;
+ --primary:#6d28d9;
+ --primary2:#ec4899;
+ --accent:#06b6d4;
+ --success:#16a34a;
+ --radius:24px;
+ --shadow:0 20px 60px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box;scroll-behavior:smooth}
+body{
+ background:
+ radial-gradient(circle at 10% 10%,rgba(124,58,237,.14),transparent 30%),
+ radial-gradient(circle at 90% 0,rgba(6,182,212,.12),transparent 28%),
+ var(--bg)!important;
+ color:var(--text)!important;
+ font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;
+}
+header,.admin-header{
+ backdrop-filter:blur(18px)!important;
+ background:linear-gradient(135deg,#111827ee,#312e81ee)!important;
+ border-bottom:1px solid rgba(255,255,255,.15)!important;
+}
+main,.admin-main,.card,.block,.info-box,.cart-container,.about-page,.page-box,.detail-container,.reviews-section{
+ border-radius:var(--radius)!important;
+ box-shadow:var(--shadow)!important;
+ border:1px solid rgba(255,255,255,.65)!important;
+ backdrop-filter:blur(14px);
+}
+button,.btn,.wb-btn-cart,.btn-main-buy,.add-product-button{
+ background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+ border:none!important;
+ border-radius:16px!important;
+ padding:12px 22px!important;
+ box-shadow:0 12px 25px rgba(109,40,217,.25);
+ transition:.25s ease!important;
+}
+button:hover,.btn:hover,.wb-btn-cart:hover,.btn-main-buy:hover,.add-product-button:hover{
+ transform:translateY(-3px) scale(1.02)!important;
+}
+input,select,textarea{
+ background:rgba(255,255,255,.9)!important;
+ border:1px solid #dbeafe!important;
+ border-radius:16px!important;
+ padding:14px!important;
+ transition:.2s!important;
+}
+input:focus,select:focus,textarea:focus{
+ outline:none!important;
+ border-color:#8b5cf6!important;
+ box-shadow:0 0 0 5px rgba(139,92,246,.15)!important;
+}
+.wb-card,.partner-card,.stat-card,.card{
+ border-radius:24px!important;
+ overflow:hidden;
+ transition:.3s cubic-bezier(.2,.8,.2,1)!important;
+}
+.wb-card:hover,.partner-card:hover,.stat-card:hover,.card:hover{
+ transform:translateY(-8px)!important;
+ box-shadow:0 25px 70px rgba(15,23,42,.16)!important;
+}
+h1,h2,h3{letter-spacing:-.03em}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8b5cf6,#ec4899);border-radius:20px}
+/* floating glow */
+.aurora-dot{
+ position:fixed;width:240px;height:240px;border-radius:50%;
+ filter:blur(80px);opacity:.25;pointer-events:none;z-index:-1;
+ background:#8b5cf6;top:10%;left:5%
+}
+@media(max-width:700px){
+ main,.admin-main{padding:18px!important}
+ .detail-container{grid-template-columns:1fr!important;padding:20px!important}
+}
+
 </style>
 
 <div class="cart-container">
+    <!-- Хедер -->
     <div class="cart-title">🛒 Ваша корзина</div>
+    
+    <!-- Таймер очистки -->
     <div class="cart-subtitle">🕒 Внимание: гостевая корзина автоматически очищается каждые 24 часа.</div>
-
+    
     {% if cart and cart.items.all %}
+        <!-- Таблица товаров -->
         <table class="cart-table">
             <thead>
                 <tr>
-                    <th style="width: 80px; text-align: center;">Купить</th>
+                    <th style="width: 60px; text-align: center;">Выбор</th>
                     <th>Название товара</th>
-                    <th style="width: 150px;">Цена</th>
-                    <th style="width: 120px;">Количество</th>
-                    <th style="width: 100px; text-align: center;">Действие</th> <!-- Новый столбец -->
+                    <th style="width: 140px;">Цена</th>
+                    <th style="width: 100px;">Кол-во</th>
+                    <th style="width: 80px; text-align: center;">Действия</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in cart.items.all %}
                     <tr class="{% if not item.is_checked %}row-unchecked{% endif %}">
                         <td style="text-align: center;">
-                            <a href="{% url 'toggle_cart_item' item.id %}" class="btn-toggle-box" title="Включить/исключить из заказа">
+                            <a href="{% url 'toggle_cart_item' item.id %}" class="btn-toggle-box">
                                 {% if item.is_checked %}🟩{% else %}⬜{% endif %}
                             </a>
                         </td>
@@ -54,9 +282,7 @@
                         <td>
                             <span class="price-tag">
                                 {% if item.product.details %}
-                                    {{ item.product.details.price }} руб.
-                                {% else %}
-                                    —
+                                    {{ item.product.details.price|floatformat:2 }} руб.
                                 {% endif %}
                             </span>
                         </td>
@@ -64,14 +290,14 @@
                             <span class="quantity-badge">{{ item.quantity }} шт.</span>
                         </td>
                         <td style="text-align: center;">
-                            <!-- Кнопка полного удаления товара из корзины гостя -->
-                            <a href="{% url 'remove_from_cart' item.product.id %}" class="btn-delete-item" onclick="return confirm('Удалить этот товар из корзины?')">❌ Удалить</a>
+                            <a href="{% url 'remove_from_cart' item.product.id %}" class="btn-delete-item" onclick="return confirm('Удалить товар из корзины?')">❌</a>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-
+        
+        <!-- Футер формы -->
         <div class="checkout-footer">
             <a href="{% url 'index' %}" class="back-link">← Вернуться к покупкам</a>
             
@@ -83,8 +309,9 @@
             </form>
         </div>
     {% else %}
+        <!-- Контент для пустой корзины -->
         <div class="cart-empty">
-            <p style="font-size: 16px;">Ваша корзина совершенно пуста.</p>
+            <p style="font-size: 20px;">Ваша корзина совершенно пуста.</p>
             <p style="font-size: 14px;">Выберите подходящие новинки на <a href="{% url 'index' %}">главной странице каталога</a>!</p>
         </div>
     {% endif %}

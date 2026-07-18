@@ -9,53 +9,65 @@
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
             margin: 0; 
-            padding: 0 0 80px 0; /* Важно: отступ снизу, чтобы контент не перекрывался закрепленным меню */
+            padding: 0 0 80px 0; /* Отступ снизу для нижнего меню */
             background-color: #f4f6f9; 
             color: #333; 
         }
         
-        /* 🔝 ВЕРХНЯЯ ШАПКА: На всю длину */
+        /* 🔝 ВЕРХНЯЯ ШАПКА */
         header { 
-            background: #1a252f; 
+            background: linear-gradient(135deg, #1a252f, #0f172a); 
             color: white; 
             padding: 20px 30px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            z-index: 10;
         }
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
-            align-items: flex-end; /* О нас прижато к нижнему краю зоны шапки */
+            align-items: center;
         }
         .site-logo {
             margin: 0; 
-            font-size: 28px; 
+            font-size: 32px; 
             letter-spacing: 1.5px; 
             font-weight: 800;
             color: white;
             cursor: pointer;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         .about-top-link {
             color: #94a3b8; 
             text-decoration: none; 
             font-size: 14px; 
             font-weight: 500;
-            transition: color 0.2s;
+            transition: all 0.2s ease;
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
         }
         .about-top-link:hover {
             color: #f39c12;
+            background: rgba(255,255,255,0.2);
         }
         
         /* 📦 ОСНОВНОЙ КОНТЕНТ */
         main { 
-            padding: 30px; 
+            padding: 30px 20px; 
             min-height: 400px; 
             max-width: 1200px; 
-            margin: 0 auto; 
+            margin: -30px auto 40px; 
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.04);
+            border: 1px solid #e2e8f0;
         }
-
-        /* 📱 ЗАКРЕПЛЕННОЕ НИЖНЕЕ МЕНЮ (Floating Bottom Navigation) */
+    
+        /* 📱 ЗАКРЕПЛЕННОЕ НИЖНЕЕ МЕНЮ */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -67,7 +79,7 @@
             justify-content: space-around;
             align-items: center;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
-            z-index: 9999; /* Поверх всех элементов при скролле */
+            z-index: 9999;
         }
         .bottom-nav-link {
             display: flex;
@@ -79,85 +91,179 @@
             font-weight: 600;
             transition: color 0.2s;
             position: relative;
+            padding: 8px 0;
         }
         .bottom-nav-link:hover {
             color: #f39c12;
         }
+        .bottom-nav-link:hover .bottom-nav-icon {
+            transform: scale(1.1);
+        }
+        
+        /* === ИЗМЕНЕНИЕ РАЗМЕРА ИКОНОК === */
         .bottom-nav-icon {
-            font-size: 20px;
-            margin-bottom: 2px;
+            font-size: 18px; <!-- БЫЛО 24px -->
+            margin-bottom: 4px;
+            transition: transform 0.2s ease;
         }
         
         /* Индикатор количества товаров в корзине */
         .cart-badge {
-            background: #28a745; 
+            background: #cb11ab; 
             color: white; 
-            padding: 1px 6px; 
-            border-radius: 10px; 
-            font-size: 10px; 
+            padding: 4px 8px; 
+            border-radius: 12px; 
+            font-size: 12px; 
             font-weight: bold; 
             position: absolute;
-            top: -4px;
-            right: -12px;
+            top: -8px;
+            right: -16px;
+            box-shadow: 0 2px 6px rgba(203, 17, 171, 0.4);
         }
-
-        /* 📞 ПОДВАЛ (КОНТАКТЫ): Строго под контентом, перед нижним закрепленным меню */
+    
+        /* 📞 ПОДВАЛ (КОНТАКТЫ) */
         footer { 
             background: #ffffff; 
             color: #475569; 
-            padding: 30px; 
+            padding: 30px 20px; 
             text-align: center; 
             font-size: 14px; 
             border-top: 1px solid #e2e8f0;
-            margin-top: 60px;
+            margin-top: 40px;
+            border-radius: 16px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,.05);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        footer h3 { color: #1e293b; margin: 0 0 10px 0; font-size: 18px; }
-        footer p { margin: 6px 0; }
-
+        footer h3 { color: #1e293b; margin: 0 0 10px 0; font-size: 20px; }
+        footer p { margin: 10px 0; line-height: 1.6; }
+    
         /* ⏱️ Стили парящего полупрозрачного таймера безопасности */
         .session-timer-box {
             position: fixed;
             top: 80px;
             right: 20px;
-            background: rgba(30, 41, 59, 0.75); /* Полупрозрачный темный фон */
-            backdrop-filter: blur(4px); /* Эффект матового стекла */
+            background: rgba(30, 41, 59, 0.75); 
+            backdrop-filter: blur(4px); 
             color: #e2e8f0;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 11px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 14px;
             font-weight: bold;
             font-family: monospace;
             z-index: 10000;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            pointer-events: none; /* Таймер не мешает кликать по элементам под ним */
+            pointer-events: none; 
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             transition: all 0.3s ease;
         }
-        /* Анимация мигания, когда время на исходе */
         @keyframes timerPulse {
             0% { background: rgba(231, 76, 60, 0.8); transform: scale(1); }
             50% { background: rgba(231, 76, 60, 1); transform: scale(1.03); }
             100% { background: rgba(231, 76, 60, 0.8); transform: scale(1); }
         }
+    
+/* ===== ZoneShop 2026 Aurora UI Upgrade ===== */
+:root{
+ --bg:#f6f7fb;
+ --surface:rgba(255,255,255,.82);
+ --text:#111827;
+ --muted:#64748b;
+ --primary:#6d28d9;
+ --primary2:#ec4899;
+ --accent:#06b6d4;
+ --success:#16a34a;
+ --radius:24px;
+ --shadow:0 20px 60px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box;scroll-behavior:smooth}
+body{
+ background:
+ radial-gradient(circle at 10% 10%,rgba(124,58,237,.14),transparent 30%),
+ radial-gradient(circle at 90% 0,rgba(6,182,212,.12),transparent 28%),
+ var(--bg)!important;
+ color:var(--text)!important;
+ font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif!important;
+}
+header,.admin-header{
+ backdrop-filter:blur(18px)!important;
+ background:linear-gradient(135deg,#111827ee,#312e81ee)!important;
+ border-bottom:1px solid rgba(255,255,255,.15)!important;
+}
+main,.admin-main,.card,.block,.info-box,.cart-container,.about-page,.page-box,.detail-container,.reviews-section{
+ border-radius:var(--radius)!important;
+ box-shadow:var(--shadow)!important;
+ border:1px solid rgba(255,255,255,.65)!important;
+ backdrop-filter:blur(14px);
+}
+button,.btn,.wb-btn-cart,.btn-main-buy,.add-product-button{
+ background:linear-gradient(135deg,var(--primary),var(--primary2))!important;
+ border:none!important;
+ border-radius:16px!important;
+ padding:12px 22px!important;
+ box-shadow:0 12px 25px rgba(109,40,217,.25);
+ transition:.25s ease!important;
+}
+button:hover,.btn:hover,.wb-btn-cart:hover,.btn-main-buy:hover,.add-product-button:hover{
+ transform:translateY(-3px) scale(1.02)!important;
+}
+input,select,textarea{
+ background:rgba(255,255,255,.9)!important;
+ border:1px solid #dbeafe!important;
+ border-radius:16px!important;
+ padding:14px!important;
+ transition:.2s!important;
+}
+input:focus,select:focus,textarea:focus{
+ outline:none!important;
+ border-color:#8b5cf6!important;
+ box-shadow:0 0 0 5px rgba(139,92,246,.15)!important;
+}
+.wb-card,.partner-card,.stat-card,.card{
+ border-radius:24px!important;
+ overflow:hidden;
+ transition:.3s cubic-bezier(.2,.8,.2,1)!important;
+}
+.wb-card:hover,.partner-card:hover,.stat-card:hover,.card:hover{
+ transform:translateY(-8px)!important;
+ box-shadow:0 25px 70px rgba(15,23,42,.16)!important;
+}
+h1,h2,h3{letter-spacing:-.03em}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-thumb{background:linear-gradient(#8b5cf6,#ec4899);border-radius:20px}
+/* floating glow */
+.aurora-dot{
+ position:fixed;width:240px;height:240px;border-radius:50%;
+ filter:blur(80px);opacity:.25;pointer-events:none;z-index:-1;
+ background:#8b5cf6;top:10%;left:5%
+}
+@media(max-width:700px){
+ main,.admin-main{padding:18px!important}
+ .detail-container{grid-template-columns:1fr!important;padding:20px!important}
+}
 
-
-    </style>
+</style>
 </head>
-
-
-
 
 <body>
 
-
-    <!-- ВЕРХНЯЯ ШАПКА: ИМЯ НА ВСЮ ДЛИНУ И "О НАС" СНИЗУ СПРАВА -->
+    <!-- ВЕРХНЯЯ ШАПКА -->
     <header>
         <div class="header-content">
             <h1 class="site-logo" onclick="window.location.href='/'">ZoneShop ⚡</h1>
-            <a href="{% url 'about' %}" class="about-top-link">О нас</a>
+            {% if not is_admin_view %}
+                <a href="{% url 'about' %}" style="
+                    color: #94a3b8; 
+                    text-decoration: none; 
+                    font-size: 14px; 
+                    font-weight: 500;
+                    transition: color 0.2s;
+                ">О нас</a>
+            {% endif %}
         </div>
     </header>
 
@@ -167,13 +273,15 @@
         {% endblock %}
     </main>
 
-    <!-- КОНТАКТЫ МАГАЗИНА: ИДУТ СЛЕДОМ ЗА КОНТЕНТОМ ПЕРЕД ЗАКРЕПЛЕННОЙ ПАНЕЛЬЮ -->
+    <!-- КОНТАКТЫ МАГАЗИНА -->
     <footer>
-        <div style="max-width: 1200px; margin: 0 auto;">
-            <h3>Контакты магазина ZoneShop</h3>
+        <div style="max-width: 1200px; margin: 0 auto; padding: 30px 20px;">
+            <h3 style="margin: 0 0 10px 0; color: #1e293b;">Контакты магазина ZoneShop</h3>
             {% if footer_contact_data %}
-                <p>📞 Телефон: <strong>{{ footer_contact_data.phone }}</strong> | ✉️ Email: <strong>{{ footer_contact_data.email }}</strong></p>
-                <p>📍 Адрес: {{ footer_contact_data.address }}</p>
+                <p style="margin: 4px 0; color: #334155;">
+                    📞 Телефон: <strong>{{ footer_contact_data.phone }}</strong> | ✉️ Email: <strong>{{ footer_contact_data.email }}</strong>
+                </p>
+                <p style="margin: 4px 0; color: #475569;">📍 Адрес: {{ footer_contact_data.address }}</p>
             {% else %}
                 <p style="font-style: italic; color: #94a3b8;">Данные контактов временно обновляются администрацией.</p>
             {% endif %}
@@ -181,28 +289,24 @@
         </div>
     </footer>
 
-    <!-- 🔒 ЗАКРЕПЛЕННОЕ НИЖНЕЕ МЕНЮ: Всегда на экране в вашем точном порядке -->
+    <!-- ЗАКРЕПЛЕННОЕ НИЖНЕЕ МЕНЮ -->
     <div class="bottom-nav">
-        <!-- 1. Просмотренное -->
         <a href="{% url 'history_detail' %}" class="bottom-nav-link">
             <span class="bottom-nav-icon">👁️</span>
             <span>Просмотренное</span>
         </a>
         
-        <!-- 2. Отмеченное -->
         <a href="{% url 'wishlist_detail' %}" class="bottom-nav-link">
             <span class="bottom-nav-icon">⭐</span>
             <span>Отмеченное</span>
         </a>
         
-        <!-- 3. Корзина (с динамической цифрой внутри зеленого кружка) -->
         <a href="{% url 'cart_detail' %}" class="bottom-nav-link">
             <span class="bottom-nav-icon">🛒</span>
             <span>Корзина</span>
             <span class="cart-badge">{{ cart_total_quantity }}</span>
         </a>
         
-        <!-- 4. Главная -->
         <a href="{% url 'index' %}" class="bottom-nav-link" style="color: #f39c12;">
             <span class="bottom-nav-icon">🏠</span>
             <span>Главная</span>
@@ -225,39 +329,40 @@
 
         function updateSessionTimer() {
             if (timeLeft <= 0) {
-                // Время вышло — принудительно выкидываем из аккаунта на страницу входа
-                window.location.href = "{% url 'admin_dashboard' %}"; // Перенаправит на login декоратором
+                window.location.href = "{% url 'admin_dashboard' %}";
                 return;
             }
 
             timeLeft--;
 
-            // Считаем минуты и секунды
             let minutes = Math.floor(timeLeft / 60);
             let seconds = timeLeft % 60;
 
-            // Форматируем вывод (добавляем нули, если число меньше 10)
             let displayMin = minutes < 10 ? '0' + minutes : minutes;
             let displaySec = seconds < 10 ? '0' + seconds : seconds;
 
             countdownSpan.textContent = `${displayMin}:${displaySec}`;
 
-            // ⚠️ УВЕДОМЛЕНИЕ ЗА 10 МИНУТ (600 секунд)
+            // Уведомление за 10 минут
             if (timeLeft <= 600 && !hasAlerted) {
                 hasAlerted = true;
-                // Включаем агрессивный красный цвет и пульсацию таймера
                 timerBox.style.animation = "timerPulse 1.5s infinite";
-                timerBox.style.color = "#ffffff";
-                
-                // Выводим всплывающее браузерное предупреждение
-                alert("⚠️ Внимание! Ваша административная сессия истекает через 10 минут. Пожалуйста, сохраните изменения, чтобы не потерять данные, или обновите страницу для продления сессии!");
+                alert("⚠️ Внимание! Ваша административная сессия истекает через 10 минут.");
             }
         }
 
-        // Обновляем таймер каждую секунду
         setInterval(updateSessionTimer, 1000);
     </script>
 {% endif %}
 
+
+<script id='ZoneShop-2026-JS'>
+document.addEventListener("DOMContentLoaded",()=>{
+ document.querySelectorAll("button,.btn,a").forEach(el=>{
+  el.addEventListener("mousedown",()=>el.style.transform="scale(.97)");
+  el.addEventListener("mouseup",()=>el.style.transform="");
+ });
+});
+</script>
 </body>
 </html>

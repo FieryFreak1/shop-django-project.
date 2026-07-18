@@ -1,0 +1,163 @@
+{% extends "store/base.html" %}
+
+
+{% block content %}
+
+<div class="container">
+
+<h2>
+    Добавление товара
+</h2>
+
+<p>
+После отправки товар попадёт на модерацию.
+</p>
+
+
+<form method="POST" enctype="multipart/form-data">
+
+{% csrf_token %}
+
+
+<div>
+<label>
+Название товара
+</label>
+
+<input 
+type="text"
+name="title"
+required
+maxlength="40">
+</div>
+
+
+<div>
+<label>
+Цена
+</label>
+
+<input 
+type="text"
+name="price"
+placeholder="Например 499.99"
+required>
+</div>
+
+
+<div>
+<label>
+Количество
+</label>
+
+<input 
+type="number"
+name="stock"
+value="0"
+min="0">
+</div>
+
+
+
+<div>
+
+<label>
+Категория
+</label>
+
+<select name="category" required>
+
+{% for cat in categories %}
+
+<option value="{{ cat.id }}">
+{{ cat.name }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+
+
+<div>
+
+<label>
+Главное фото
+</label>
+
+<input 
+type="file"
+name="product_image">
+
+</div>
+
+
+
+<div>
+
+<label>
+Дополнительные фотографии
+</label>
+
+<input 
+type="file"
+name="gallery_images"
+multiple>
+
+</div>
+
+
+
+<hr>
+
+
+<h4>
+Теги
+</h4>
+
+
+{% for tag in tags %}
+
+<label>
+
+<input 
+type="checkbox"
+name="selected_tags"
+value="{{ tag.id }}">
+
+{{ tag.name }}
+
+</label>
+
+<br>
+
+{% empty %}
+
+<p>
+Тегов пока нет.
+</p>
+
+{% endfor %}
+
+
+
+<br>
+
+
+<button 
+type="submit">
+
+Добавить на модерацию
+
+</button>
+
+
+</form>
+
+
+</div>
+
+
+{% endblock %}

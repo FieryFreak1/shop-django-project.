@@ -1,0 +1,25 @@
+<h2>Отклонение товара</h2>
+
+<p><strong>{{ product.name }}</strong></p>
+
+<form method="post">
+    {% csrf_token %}
+
+    <textarea
+        name="comment"
+        rows="6"
+        style="width:100%;"
+        placeholder="Укажите причину отклонения..."
+        required
+    ></textarea>
+
+    <br><br>
+
+    <button type="submit">
+        ❌ Отклонить товар
+    </button>
+</form>
+
+
+
+
